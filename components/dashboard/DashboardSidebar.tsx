@@ -168,10 +168,6 @@ export default function DashboardSidebar() {
             <StatLabel>Rate Limit (rpm)</StatLabel>
             <StatValue>{perMinute}</StatValue>
           </StatRow>
-          <StatRow>
-            <StatLabel>Last Used</StatLabel>
-            <StatValue>{lastUsed ? lastUsed.slice(0, 10) : "-"}</StatValue>
-          </StatRow>
         </SectionContent>
       </Section>
 

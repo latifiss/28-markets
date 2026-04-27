@@ -67,6 +67,7 @@ const StatLabel = styled.div`
 
 const StatValue = styled.div`
   font-family: 'Proxima Nova', sans-serif;
+  text-transform: capitalize;
   font-size: 1.5rem;
   font-weight: 700;
   color: ${({ theme }) => theme.colors.text};
@@ -190,12 +191,6 @@ export default function ApiKeysSection() {
               ? `Expires: ${currentPeriodEnd ? formatDate(currentPeriodEnd) : "-"}`
               : `Reset date: ${currentPeriodEnd ? formatDate(currentPeriodEnd) : "-"}`}
           </StatChange>
-        </StatCard>
-
-        <StatCard>
-          <StatLabel>Last Used</StatLabel>
-          <StatValue>{lastUsed ? lastUsed.slice(0, 10) : "-"}</StatValue>
-          <StatChange>{lastUsed ? "" : "No usage yet"}</StatChange>
         </StatCard>
       </StatsGrid>
 
