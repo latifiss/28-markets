@@ -6,6 +6,11 @@ import { useDispatch } from "react-redux";
 import { logout } from "@/store/features/auth/authSlice";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useAppSelector } from "@/store/app/hooks";
+import { selectCurrentUser } from "@/store/features/auth/authSlice";
+import { selectSubscription } from "@/store/features/billing/billingSlice";
+import { selectProfileUsage } from "@/store/features/usage/usageSlice";
+import { useGetApiKeysQuery } from "@/store/features/auth/authAPI";
 
 const SidebarContainer = styled.div`
   padding: 1.5rem 0;
@@ -106,6 +111,23 @@ export default function DashboardSidebar() {
   const [usageReportOpen, setUsageReportOpen] = useState(true);
   const dispatch = useDispatch();
   const router = useRouter();
+  const user = useAppSelector(selectCurrentUser);
+  const subscription = useAppSelector(selectSubscription);
+  const profileUsage = useAppSelector(selectProfileUsage);
+  const { data: apiKeysData } = useGetApiKeysQuery(undefined, { skip: !user });
+
+  const tier = (subscription?.tier ?? user?.tier ?? "free") as string;
+  const perMinute = tier === "business" ? 120 : tier === "pro" ? 100 : 30;
+  const monthlyLimit = user?.usage?.limit ?? (tier === "free" ? 10_000 : null);
+  const monthlyUsed = (profileUsage?.usage ?? []).reduce((sum, u) => sum + (u.count ?? 0), 0);
+  const remaining = monthlyLimit != null ? Math.max(0, monthlyLimit - monthlyUsed) : null;
+  const lastUsed =
+    (apiKeysData?.apiKeys ?? [])
+      .map((k) => k.lastUsed)
+      .filter(Boolean)
+      .sort()
+      .at(-1) ?? null;
+  const formatNumber = (n: number) => new Intl.NumberFormat().format(n);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -134,19 +156,21 @@ export default function DashboardSidebar() {
         <SectionContent open={usageReportOpen}>
           <StatRow>
             <StatLabel>Monthly API Calls</StatLabel>
-            <StatValue>0 / 10,000</StatValue>
+            <StatValue>
+              {monthlyLimit != null ? `${formatNumber(monthlyUsed)} / ${formatNumber(monthlyLimit)}` : `${formatNumber(monthlyUsed)} / Unlimited`}
+            </StatValue>
           </StatRow>
           <StatRow>
             <StatLabel>Remaining Calls</StatLabel>
-            <StatValue>10,000</StatValue>
+            <StatValue>{remaining != null ? formatNumber(remaining) : "Unlimited"}</StatValue>
           </StatRow>
           <StatRow>
             <StatLabel>Rate Limit (rpm)</StatLabel>
-            <StatValue>30</StatValue>
+            <StatValue>{perMinute}</StatValue>
           </StatRow>
           <StatRow>
             <StatLabel>Last Used</StatLabel>
-            <StatValue>-</StatValue>
+            <StatValue>{lastUsed ? lastUsed.slice(0, 10) : "-"}</StatValue>
           </StatRow>
         </SectionContent>
       </Section>

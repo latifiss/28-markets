@@ -2,14 +2,14 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
-import { IoInformationCircleOutline } from 'react-icons/io5';
-import { useDispatch, useSelector } from "react-redux";
+import { IoInformationCircleOutline, IoClose } from 'react-icons/io5';
 import { toggleTheme } from "@/store/themeSlice";
-import { RootState } from "@/store";
 import { LuMoon, LuSun, LuMenu } from "react-icons/lu";
+import Button from './buttons/button';
+import { useAppDispatch, useAppSelector } from '@/store/app/hooks';
+import { logout, selectIsAuthenticated } from '@/store/features/auth/authSlice';
 
 const HeadWrapper = styled.header`
   display: flex;
@@ -17,6 +17,7 @@ const HeadWrapper = styled.header`
   align-items: flex-start;
   padding-top: 16px;
   width: 100%;
+  position: relative;
 `;
 
 const AdContainer = styled.div`
@@ -113,6 +114,19 @@ const Logo = styled(Image)`
   @media (min-width: 577px) and (max-width: 768px) {
     height: 45px;
   }
+`;
+
+const RightSection = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 12px;
+`;
+
+const PricingButton = styled(Button)`
+  padding: 8px 20px;
+  height: 38px;
+  font-size: 14px;
+  font-weight: 600;
 `;
 
 const OtherSide = styled.div`
@@ -221,17 +235,6 @@ const SunIcon = styled(LuSun)`
   color: ${({ theme }) => theme.colors.grayText};
 `;
 
-const ThemeToggle = () => {
-  const themeMode = useSelector((state: RootState) => state.theme.theme);
-  const dispatch = useDispatch();
-
-  return (
-    <IconButton onClick={() => dispatch(toggleTheme())}>
-      {themeMode === "light" ? <MoonIcon /> : <SunIcon />}
-    </IconButton>
-  );
-};
-
 const MenuIcon = styled(LuMenu)`
   width: 24px;
   height: 24px;
@@ -254,6 +257,116 @@ const MenuButton = styled.button`
   }
 `;
 
+const Overlay = styled.div<{ $isOpen: boolean }>`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+  opacity: ${({ $isOpen }) => ($isOpen ? 1 : 0)};
+  visibility: ${({ $isOpen }) => ($isOpen ? 'visible' : 'hidden')};
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+`;
+
+const ModalContainer = styled.div<{ $isOpen: boolean }>`
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 320px;
+  height: 100%;
+  background-color: ${({ theme }) => theme.colors.boxBg};
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  transform: translateX(${({ $isOpen }) => ($isOpen ? '0' : '100%')});
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+`;
+
+const ModalHeader = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 20px;
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+`;
+
+const CloseButton = styled.button`
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  border-radius: 50%;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.border};
+  }
+`;
+
+const CloseIcon = styled(IoClose)`
+  width: 24px;
+  height: 24px;
+  color: ${({ theme }) => theme.colors.text};
+`;
+
+const ModalContent = styled.div`
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  gap: 16px;
+`;
+
+const MenuLink = styled(Link)`
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  font-size: 16px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.text};
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: ${({ theme }) => theme.colors.border};
+  }
+`;
+
+const LoginButtonWrapper = styled.div`
+  padding: 12px 16px;
+  margin-bottom: -18px;
+`;
+
+const SignupButtonWrapper = styled.div`
+  padding: 12px 16px;
+`;
+
+const StyledLoginButton = styled(Button)`
+  width: 100%;
+  justify-content: center;
+`;
+
+const StyledSignupButton = styled(Button)`
+  width: 100%;
+  justify-content: center;
+`;
+
+const ThemeToggle = () => {
+  const themeMode = useAppSelector((state) => state.theme.theme);
+  const dispatch = useAppDispatch();
+
+  return (
+    <IconButton onClick={() => dispatch(toggleTheme())}>
+      {themeMode === "light" ? <MoonIcon /> : <SunIcon />}
+    </IconButton>
+  );
+};
+
 interface TabProps {
   label: string;
   isActive: boolean;
@@ -271,40 +384,112 @@ const Tab = ({ label, isActive, href, TabImage }: TabProps) => (
 );
 
 const Header = () => {
-  const themeMode = useSelector((state: RootState) => state.theme.theme);
+  const themeMode = useAppSelector((state) => state.theme.theme);
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const dispatch = useAppDispatch();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   
-  // Determine which logo to use based on theme
   const logoSrc = themeMode === "light" 
-    ? "assets/logo/logo-black.svg" 
-    : "assets/logo/logo-white.svg";
+    ? "/assets/logo/logo-black.svg" 
+    : "/assets/logo/logo-white.svg";
+
+  const handleMenuToggle = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleCloseMenu = () => {
+    setIsMenuOpen(false);
+  };
+
+  const handleLogout = useCallback(() => {
+    dispatch(logout());
+    handleCloseMenu();
+  }, [dispatch]);
 
   return (
-    <HeadWrapper>
-      <AdContainer>
-        <LabelContainer>
-          <InfoIcon />
-          <AdLabel>Advertisement</AdLabel>
-        </LabelContainer>
-        <InsideAdWrapper>
-          <AdWrapper />
-        </InsideAdWrapper>
-      </AdContainer>
+    <>
+      <HeadWrapper>
+        <AdContainer>
+          <LabelContainer>
+            <InfoIcon />
+            <AdLabel>Advertisement</AdLabel>
+          </LabelContainer>
+          <InsideAdWrapper>
+            <AdWrapper />
+          </InsideAdWrapper>
+        </AdContainer>
 
-      <Component>
-        <TopRow>
-          <LogoLink href="/">
-            <Logo 
-              src={logoSrc} 
-              alt="logo" 
-              width={322} 
-              height={55} 
-              priority
-            />
-          </LogoLink>
-          <ThemeToggle />
-        </TopRow>
-      </Component>
-    </HeadWrapper>
+        <Component>
+          <TopRow>
+            <LogoLink href="/">
+              <Logo 
+                src={logoSrc} 
+                alt="logo" 
+                width={322} 
+                height={55} 
+                priority
+              />
+            </LogoLink>
+            <RightSection>
+              <ThemeToggle />
+              <MenuButton onClick={handleMenuToggle}>
+                <MenuIcon />
+              </MenuButton>
+            </RightSection>
+          </TopRow>
+        </Component>
+      </HeadWrapper>
+
+      <Overlay $isOpen={isMenuOpen} onClick={handleCloseMenu} />
+      
+      <ModalContainer $isOpen={isMenuOpen}>
+        <ModalHeader>
+          <CloseButton onClick={handleCloseMenu}>
+            <CloseIcon />
+          </CloseButton>
+        </ModalHeader>
+        <ModalContent>
+          {!isAuthenticated ? (
+            <>
+              <LoginButtonWrapper>
+                <StyledLoginButton variant="primary" onClick={handleCloseMenu}>
+                  <Link href="/login" style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
+                    Login
+                  </Link>
+                </StyledLoginButton>
+              </LoginButtonWrapper>
+              <SignupButtonWrapper>
+                <StyledSignupButton variant="outline" onClick={handleCloseMenu}>
+                  <Link href="/signup" style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
+                    Sign Up
+                  </Link>
+                </StyledSignupButton>
+              </SignupButtonWrapper>
+            </>
+          ) : (
+            <LoginButtonWrapper>
+              <StyledLoginButton variant="outline" onClick={handleLogout}>
+                Logout
+              </StyledLoginButton>
+            </LoginButtonWrapper>
+          )}
+          <MenuLink href="/api" onClick={handleCloseMenu}>
+            API
+          </MenuLink>
+          <MenuLink href="/docs" onClick={handleCloseMenu}>
+            Documentation
+          </MenuLink>
+          <MenuLink href="/pricing" onClick={handleCloseMenu}>
+            Pricing
+          </MenuLink>
+          {isAuthenticated && (
+            <MenuLink href="/dashboard" onClick={handleCloseMenu}>
+              Developer
+            </MenuLink>
+          )}
+        </ModalContent>
+      </ModalContainer>
+    </>
   );
 };
 

@@ -4,6 +4,11 @@ import styled from "styled-components";
 import DashboardHeader from "./DashboardHeader";
 import DashboardSidebar from "./DashboardSidebar";
 import ApiKeysSection from "./sections/ApiKeysSection";
+import { useAppSelector } from "@/store/app/hooks";
+import { selectIsAuthenticated } from "@/store/features/auth/authSlice";
+import { useGetProfileQuery } from "@/store/features/auth/authAPI";
+import { useGetSubscriptionQuery } from "@/store/features/billing/billingAPI";
+import { useGetProfileUsageQuery } from "@/store/features/usage/usageAPI";
 
 const Container = styled.div`
   display: flex;
@@ -31,6 +36,15 @@ const MainContent = styled.div`
 `;
 
 export default function DashboardLayout() {
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+
+  useGetProfileQuery(undefined, { skip: !isAuthenticated });
+  useGetSubscriptionQuery(undefined, { skip: !isAuthenticated });
+  useGetProfileUsageQuery({ month, year }, { skip: !isAuthenticated });
+
   return (
     <Container>
       <Sidebar>

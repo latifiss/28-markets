@@ -13,6 +13,7 @@ interface ApiKey {
 
 interface ApiKeyTableProps {
   apiKeys: ApiKey[];
+  onDelete?: (id: string) => void | Promise<void>;
 }
 
 const Container = styled.div`
@@ -105,7 +106,7 @@ const EmptyState = styled.div`
   color: ${({ theme }) => theme.colors.grayText};
 `;
 
-export default function ApiKeyTable({ apiKeys }: ApiKeyTableProps) {
+export default function ApiKeyTable({ apiKeys, onDelete }: ApiKeyTableProps) {
   const [visibleKeys, setVisibleKeys] = useState<Set<string>>(new Set());
 
   const toggleKeyVisibility = (id: string) => {
@@ -124,7 +125,7 @@ export default function ApiKeyTable({ apiKeys }: ApiKeyTableProps) {
 
   const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this API key?")) {
-      console.log("Delete key:", id);
+      onDelete?.(id);
     }
   };
 

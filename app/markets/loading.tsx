@@ -398,3 +398,14 @@ const LoadingComponent = () => {
 };
 
 export default LoadingComponent;
+
+export const BodyLoadingComponent = () => {
+  return (
+        <ShimmerCard>
+          <ShimmerOtherContainer>
+            <ShimmerSubHeader />
+            {renderShimmerItems(8)}
+          </ShimmerOtherContainer>
+        </ShimmerCard>
+  );
+};

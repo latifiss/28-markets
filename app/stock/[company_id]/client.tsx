@@ -9,15 +9,13 @@ import { StockItem } from '@/components/stockItem';
 import OverviewTable from '@/components/tables/overview';
 import FinHighlight from '@/components/tables/finHighlight';
 import DividendTable from '@/components/tables/dividentTable';
-import HolderTable from '@/components/tables/holderTable';
-import OwnershipTable from '@/components/tables/ownershipTable';
 import PerformanceChart from '@/components/charts/performanceChart';
-import Card from '@/components/card';
 import stocksApi, { Profile, Statistics, Dividends, Earnings, Financial, Holders, PriceHistory } from '@/lib/api/stocks';
 import { getStockLogo } from '@/utils/getStockLogo';
 import { formatPercentage } from '@/utils/percentageFormatter';
 import { getArticlesByTag } from '@/lib/api/articles';
 import type { Article } from '@/lib/api/articles';
+import LoadingComponent from './loading';
 
 const blink = keyframes`
     0% {
@@ -117,12 +115,12 @@ const Left = styled.div`
     padding: 16px 24px;
 
     @media only screen and (max-width: 576px) { 
-    padding: 16px 0px;
-  }
+        padding: 16px 0px;
+    }
 
-  @media only screen and (min-width: 577px) and (max-width: 768px) { 
-    padding: 16px 0px;
-  }
+    @media only screen and (min-width: 577px) and (max-width: 768px) { 
+        padding: 16px 0px;
+    }
 `;
 
 const Right = styled.div`
@@ -217,7 +215,7 @@ const StockLogo = styled(Image)`
         width: 88px;
         height: 88px;
     }
-`
+`;
 
 const StockHeadInfo = styled.div`
     display: flex;
@@ -237,7 +235,7 @@ const StockHeadInfo = styled.div`
     @media only screen and (min-width: 769px) and (max-width: 992px) {
         margin-top: -8px;
     }
-`
+`;
 
 const StockSymbol = styled.p`
     font-size: 20px;
@@ -430,12 +428,12 @@ const TabContent = styled.div`
     margin-right: 24px;
 
     @media only screen and (max-width: 576px) { 
-    margin-right: 0px;
-  }
+        margin-right: 0px;
+    }
 
-  @media only screen and (min-width: 577px) and (max-width: 768px) { 
-    margin-right: 0px;
-  }
+    @media only screen and (min-width: 577px) and (max-width: 768px) { 
+        margin-right: 0px;
+    }
 `;
 
 const SectInfo = styled.div`
@@ -452,7 +450,7 @@ const SectInfoRow = styled.div`
     justify-content: space-between;
     gap: 16px;
     width: 100%;
-`
+`;
 
 const SectTextHead = styled.p`
     font-size: 16px;
@@ -502,29 +500,20 @@ const TabContentInnerGrid = styled.div`
     width: 100%;
 
     @media only screen and (max-width: 576px) { 
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    width: 100%;
-  }
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        width: 100%;
+    }
 
-  @media only screen and (min-width: 577px) and (max-width: 768px) { 
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-    width: 100%;
-  }
-`;
-
-const NewsContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  width: 100%;
-  margin: 12px 0px;
-  gap: 12px;
+    @media only screen and (min-width: 577px) and (max-width: 768px) { 
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+        width: 100%;
+    }
 `;
 
 const ErrorText = styled.p`
@@ -550,143 +539,319 @@ const DebugContainer = styled.div`
     overflow-y: auto;
 `;
 
-const formatDate = (timestamp?: string) => {
-  if (!timestamp) return ' ';
-  return new Date(timestamp).toLocaleString();
-};
+const ShimmerText = styled.div<{ width: string }>`
+    width: ${({ width }) => width};
+    height: 16px;
+    background: linear-gradient(
+        90deg,
+        ${({ theme }) => theme.colors.border} 0%,
+        ${({ theme }) => theme.colors.stroke} 50%,
+        ${({ theme }) => theme.colors.border} 100%
+    );
+    background-size: 1000px 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 4px;
+`;
 
-const getTagType = (article?: Article | null) => {
-  if (!article) return '';
-  if (article.tags && article.tags.length > 0) return article.tags[0];
-  return article.category || '';
+const shimmer = keyframes`
+    0% {
+        background-position: -1000px 0;
+    }
+    100% {
+        background-position: 1000px 0;
+    }
+`;
+
+const ShimmerRow = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 12px 0;
+    border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+`;
+
+const ShimmerIcon = styled.div`
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: linear-gradient(
+        90deg,
+        ${({ theme }) => theme.colors.border} 0%,
+        ${({ theme }) => theme.colors.stroke} 50%,
+        ${({ theme }) => theme.colors.border} 100%
+    );
+    background-size: 1000px 100%;
+    animation: ${shimmer} 1.5s infinite;
+`;
+
+const ShimmerTextSmall = styled.div<{ width: string }>`
+    width: ${({ width }) => width};
+    height: 12px;
+    background: linear-gradient(
+        90deg,
+        ${({ theme }) => theme.colors.border} 0%,
+        ${({ theme }) => theme.colors.stroke} 50%,
+        ${({ theme }) => theme.colors.border} 100%
+    );
+    background-size: 1000px 100%;
+    animation: ${shimmer} 1.5s infinite;
+    border-radius: 4px;
+`;
+
+const TextGroup = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+`;
+
+const LeftSection = styled.div`
+    display: flex;
+    gap: 12px;
+    align-items: center;
+`;
+
+const RightSection = styled.div`
+    display: flex;
+    gap: 12px;
+    align-items: center;
+`;
+
+const BodyLoadingComponent = () => {
+    return (
+        <>
+            <ShimmerRow>
+                <LeftSection>
+                    <ShimmerIcon />
+                    <TextGroup>
+                        <ShimmerText width="120px" />
+                        <ShimmerTextSmall width="80px" />
+                    </TextGroup>
+                </LeftSection>
+                <RightSection>
+                    <TextGroup style={{ alignItems: 'flex-end' }}>
+                        <ShimmerText width="60px" />
+                        <ShimmerTextSmall width="50px" />
+                    </TextGroup>
+                </RightSection>
+            </ShimmerRow>
+            <ShimmerRow>
+                <LeftSection>
+                    <ShimmerIcon />
+                    <TextGroup>
+                        <ShimmerText width="120px" />
+                        <ShimmerTextSmall width="80px" />
+                    </TextGroup>
+                </LeftSection>
+                <RightSection>
+                    <TextGroup style={{ alignItems: 'flex-end' }}>
+                        <ShimmerText width="60px" />
+                        <ShimmerTextSmall width="50px" />
+                    </TextGroup>
+                </RightSection>
+            </ShimmerRow>
+            <ShimmerRow>
+                <LeftSection>
+                    <ShimmerIcon />
+                    <TextGroup>
+                        <ShimmerText width="120px" />
+                        <ShimmerTextSmall width="80px" />
+                    </TextGroup>
+                </LeftSection>
+                <RightSection>
+                    <TextGroup style={{ alignItems: 'flex-end' }}>
+                        <ShimmerText width="60px" />
+                        <ShimmerTextSmall width="50px" />
+                    </TextGroup>
+                </RightSection>
+            </ShimmerRow>
+            <ShimmerRow>
+                <LeftSection>
+                    <ShimmerIcon />
+                    <TextGroup>
+                        <ShimmerText width="120px" />
+                        <ShimmerTextSmall width="80px" />
+                    </TextGroup>
+                </LeftSection>
+                <RightSection>
+                    <TextGroup style={{ alignItems: 'flex-end' }}>
+                        <ShimmerText width="60px" />
+                        <ShimmerTextSmall width="50px" />
+                    </TextGroup>
+                </RightSection>
+            </ShimmerRow>
+        </>
+    );
 };
 
 interface CompanyData {
-  profile: Profile | null;
-  statistics: Statistics | null;
-  dividends: Dividends | null;
-  earnings: Earnings | null;
-  financial: Financial | null;
-  holders: Holders | null;
-  priceHistory: PriceHistory | null;
+    profile: Profile | null;
+    statistics: Statistics | null;
+    dividends: Dividends | null;
+    earnings: Earnings | null;
+    financial: Financial | null;
+    holders: Holders | null;
+    priceHistory: PriceHistory | null;
 }
 
 interface StockPageClientProps {
-  companyId: string;
-  initialData: CompanyData | null;
+    companyId: string;
+    initialData: CompanyData | null;
 }
 
 const StockPageClient = ({ companyId, initialData }: StockPageClientProps) => {
     const [isMarketOpen, setIsMarketOpen] = useState(true);
     const [activeTab, setActiveTab] = useState('Overview');
+    const [isInitialLoad, setIsInitialLoad] = useState(true);
+    const [hasShownContent, setHasShownContent] = useState(false);
     const [companyData, setCompanyData] = useState<CompanyData>(initialData || {
-      profile: null,
-      statistics: null,
-      dividends: null,
-      earnings: null,
-      financial: null,
-      holders: null,
-      priceHistory: null
+        profile: null,
+        statistics: null,
+        dividends: null,
+        earnings: null,
+        financial: null,
+        holders: null,
+        priceHistory: null
     });
     const [error, setError] = useState<string | null>(null);
     const [debugInfo, setDebugInfo] = useState<string>('');
-    const [newsArticles, setNewsArticles] = useState<Article[]>([]);
     const [moreStockStats, setMoreStockStats] = useState<Record<string, Statistics | null>>({});
+    const [loadingStates, setLoadingStates] = useState({
+        profile: true,
+        statistics: true,
+        dividends: true,
+        earnings: true,
+        financial: true,
+        holders: true,
+        priceHistory: true,
+        moreStocks: true,
+        articles: true
+    });
     
     useEffect(() => {
         if (!initialData) {
-            const fetchCompanyData = async () => {
+            const fetchCompanyDataProgressively = async () => {
                 try {
-                    setDebugInfo('Starting API calls...\n');
+                    setDebugInfo('Starting progressive API calls...\n');
                     
-                    const [
-                      profileRes,
-                      statisticsRes,
-                      dividendsRes,
-                      earningsRes,
-                      financialRes,
-                      holdersRes,
-                      priceHistoryRes
-                    ] = await Promise.allSettled([
-                      stocksApi.getProfileByCompanyId(companyId),
-                      stocksApi.getStatisticsByCompanyId(companyId),
-                      stocksApi.getDividendsByCompanyId(companyId),
-                      stocksApi.getEarningsByCompanyId(companyId),
-                      stocksApi.getFinancialByCompanyId(companyId),
-                      stocksApi.getHoldersByCompanyId(companyId),
-                      stocksApi.getCompanyPriceHistory(companyId)
+                    const criticalData = await Promise.all([
+                        stocksApi.getStatisticsByCompanyId(companyId),
+                        stocksApi.getProfileByCompanyId(companyId)
                     ]);
                     
+                    const [statisticsRes, profileRes] = criticalData;
+                    
+                    const extractData = (result: any, dataKey?: string) => {
+                        if (!result) return null;
+                        if (result.data) {
+                            if (dataKey && result.data[dataKey]) {
+                                return result.data[dataKey];
+                            }
+                            return result.data;
+                        }
+                        return result;
+                    };
+                    
+                    const statistics = extractData(statisticsRes, 'statistics') || (statisticsRes?.statistics) || null;
+                    const profile = extractData(profileRes, 'profile') || (profileRes?.profile) || null;
+                    
+                    setCompanyData(prev => ({
+                        ...prev,
+                        profile,
+                        statistics
+                    }));
+                    
+                    setLoadingStates(prev => ({
+                        ...prev,
+                        profile: false,
+                        statistics: false
+                    }));
+                    
+                    if (statistics?.key_statistics?.status) {
+                        setIsMarketOpen(statistics.key_statistics.status === 'open');
+                    }
+                    
+                    if (isInitialLoad) {
+                        setIsInitialLoad(false);
+                        setHasShownContent(true);
+                    }
+                    
+                    const remainingData = await Promise.allSettled([
+                        stocksApi.getDividendsByCompanyId(companyId),
+                        stocksApi.getEarningsByCompanyId(companyId),
+                        stocksApi.getFinancialByCompanyId(companyId),
+                        stocksApi.getHoldersByCompanyId(companyId),
+                        stocksApi.getCompanyPriceHistory(companyId)
+                    ]);
+                    
+                    const [dividendsRes, earningsRes, financialRes, holdersRes, priceHistoryRes] = remainingData;
+                    
+                    const dividends = dividendsRes.status === 'fulfilled' ? extractData(dividendsRes.value, 'dividends') : null;
+                    const earnings = earningsRes.status === 'fulfilled' ? extractData(earningsRes.value, 'earnings') : null;
+                    const financial = financialRes.status === 'fulfilled' ? extractData(financialRes.value, 'financial') : null;
+                    const holders = holdersRes.status === 'fulfilled' ? extractData(holdersRes.value, 'holders') : null;
+                    const priceHistory = priceHistoryRes.status === 'fulfilled' ? extractData(priceHistoryRes.value, 'priceHistory') : null;
+                    
+                    setCompanyData(prev => ({
+                        ...prev,
+                        dividends,
+                        earnings,
+                        financial,
+                        holders,
+                        priceHistory
+                    }));
+                    
+                    setLoadingStates(prev => ({
+                        ...prev,
+                        dividends: false,
+                        earnings: false,
+                        financial: false,
+                        holders: false,
+                        priceHistory: false
+                    }));
+                    
                     let debugLog = 'API Responses:\n';
-                    debugLog += `Profile: ${profileRes.status} - ${profileRes.status === 'fulfilled' ? JSON.stringify(profileRes.value).substring(0, 200) + '...' : 'Rejected'}\n`;
-                    debugLog += `Statistics: ${statisticsRes.status} - ${statisticsRes.status === 'fulfilled' ? JSON.stringify(statisticsRes.value).substring(0, 200) + '...' : 'Rejected'}\n`;
-                    debugLog += `Dividends: ${dividendsRes.status} - ${dividendsRes.status === 'fulfilled' ? JSON.stringify(dividendsRes.value).substring(0, 200) + '...' : 'Rejected'}\n`;
-                    debugLog += `Earnings: ${earningsRes.status} - ${earningsRes.status === 'fulfilled' ? JSON.stringify(earningsRes.value).substring(0, 200) + '...' : 'Rejected'}\n`;
-                    debugLog += `Financial: ${financialRes.status} - ${financialRes.status === 'fulfilled' ? JSON.stringify(financialRes.value).substring(0, 200) + '...' : 'Rejected'}\n`;
-                    debugLog += `Holders: ${holdersRes.status} - ${holdersRes.status === 'fulfilled' ? JSON.stringify(holdersRes.value).substring(0, 200) + '...' : 'Rejected'}\n`;
-                    debugLog += `PriceHistory: ${priceHistoryRes.status} - ${priceHistoryRes.status === 'fulfilled' ? JSON.stringify(priceHistoryRes.value).substring(0, 200) + '...' : 'Rejected'}\n`;
+                    debugLog += `Profile: ${profile ? 'Success' : 'Failed'}\n`;
+                    debugLog += `Statistics: ${statistics ? 'Success' : 'Failed'}\n`;
+                    debugLog += `Dividends: ${dividends ? 'Success' : 'Failed'}\n`;
+                    debugLog += `Earnings: ${earnings ? 'Success' : 'Failed'}\n`;
+                    debugLog += `Financial: ${financial ? 'Success' : 'Failed'}\n`;
+                    debugLog += `Holders: ${holders ? 'Success' : 'Failed'}\n`;
+                    debugLog += `PriceHistory: ${priceHistory ? 'Success' : 'Failed'}\n`;
                     
                     setDebugInfo(debugLog);
                     
-                    const extractData = (result: PromiseSettledResult<any>, dataKey?: string) => {
-                        if (result.status === 'rejected') {
-                            console.error('API call rejected:', result.reason);
-                            return null;
-                        }
-                        
-                        const response = result.value;
-                        console.log('API Response:', response);
-                        
-                        if (response.data) {
-                            if (dataKey && response.data[dataKey]) {
-                                return response.data[dataKey];
-                            }
-                            return response.data;
-                        }
-                        
-                        return response;
-                    };
-                    
-                    const newData: CompanyData = {
-                      profile: extractData(profileRes, 'profile') || 
-                              (profileRes.status === 'fulfilled' ? profileRes.value : null),
-                      statistics: extractData(statisticsRes, 'statistics') || 
-                                 (statisticsRes.status === 'fulfilled' ? statisticsRes.value : null),
-                      dividends: extractData(dividendsRes, 'dividends') || 
-                                (dividendsRes.status === 'fulfilled' ? dividendsRes.value : null),
-                      earnings: extractData(earningsRes, 'earnings') || 
-                               (earningsRes.status === 'fulfilled' ? earningsRes.value : null),
-                      financial: extractData(financialRes, 'financial') || 
-                                (financialRes.status === 'fulfilled' ? financialRes.value : null),
-                      holders: extractData(holdersRes, 'holders') || 
-                              (holdersRes.status === 'fulfilled' ? holdersRes.value : null),
-                      priceHistory: extractData(priceHistoryRes, 'priceHistory') || 
-                                   (priceHistoryRes.status === 'fulfilled' ? priceHistoryRes.value : null)
-                    };
-                    
-                    console.log('Processed Company Data:', newData);
-                    
-                    setCompanyData(newData);
-                    
-                    if (newData.statistics?.key_statistics?.status) {
-                        setIsMarketOpen(newData.statistics.key_statistics.status === 'open');
-                    }
-                    
-                    if (!newData.profile && !newData.statistics) {
-                      setError('Unable to load company data. Please try again.');
+                    if (!profile && !statistics) {
+                        setError('Unable to load company data. Please try again.');
                     }
                     
                 } catch (err) {
                     console.error('Error fetching company data:', err);
                     setError('Failed to load company data. Please try again later.');
                     setDebugInfo(prev => prev + `\nError: ${err}`);
+                    setIsInitialLoad(false);
+                    setHasShownContent(true);
                 }
             };
             
             if (companyId) {
-                fetchCompanyData();
+                fetchCompanyDataProgressively();
             }
         } else {
+            setIsInitialLoad(false);
+            setHasShownContent(true);
+            setLoadingStates({
+                profile: false,
+                statistics: false,
+                dividends: false,
+                earnings: false,
+                financial: false,
+                holders: false,
+                priceHistory: false,
+                moreStocks: true,
+                articles: true
+            });
             if (initialData.statistics?.key_statistics?.status) {
                 setIsMarketOpen(initialData.statistics.key_statistics.status === 'open');
             }
@@ -695,62 +860,50 @@ const StockPageClient = ({ companyId, initialData }: StockPageClientProps) => {
 
     useEffect(() => {
         const TICKERS = [
-          'ACCESS','AADS','ASG','ALLGH','EGH','GCB','GOIL','GGBL','MTNGH',
-          'SOGEGH','SCB','TOTAL','TLW','UNIL','SIC','RBGH','TBL','FML'
+            'ACCESS','AADS','ASG','ALLGH','EGH','GCB','GOIL','GGBL','MTNGH',
+            'SOGEGH','SCB','TOTAL','TLW','UNIL','SIC','RBGH','TBL','FML'
         ];
 
         const fetchMoreStocks = async () => {
-          try {
-            const results = await Promise.all(
-              TICKERS.map(async (t) => {
-                try {
-                  const res = await stocksApi.getStatisticsByCompanyId(t);
-                  const apiData: any = (res as any)?.data ?? res;
-                  const stats = apiData?.statistics ?? apiData ?? null;
-                  return { t, stats };
-                } catch (err) {
-                  console.error(`Error fetching stats for ${t}:`, err);
-                  return { t, stats: null };
-                }
-              })
-            );
+            try {
+                const results = await Promise.all(
+                    TICKERS.map(async (t) => {
+                        try {
+                            const res = await stocksApi.getStatisticsByCompanyId(t);
+                            const apiData: any = (res as any)?.data ?? res;
+                            const stats = apiData?.statistics ?? apiData ?? null;
+                            return { t, stats };
+                        } catch (err) {
+                            console.error(`Error fetching stats for ${t}:`, err);
+                            return { t, stats: null };
+                        }
+                    })
+                );
 
-            const map: Record<string, Statistics | null> = {};
-            for (const r of results) {
-              map[r.t] = r.stats;
+                const map: Record<string, Statistics | null> = {};
+                for (const r of results) {
+                    map[r.t] = r.stats;
+                }
+                setMoreStockStats(map);
+                setLoadingStates(prev => ({ ...prev, moreStocks: false }));
+            } catch (err) {
+                console.error('Error fetching more stock statistics:', err);
+                setLoadingStates(prev => ({ ...prev, moreStocks: false }));
             }
-            setMoreStockStats(map);
-          } catch (err) {
-            console.error('Error fetching more stock statistics:', err);
-          }
         };
 
         fetchMoreStocks();
     }, []);
-
-    useEffect(() => {
-        const name = companyData.profile?.about?.company_name;
-        if (!name) return;
-
-        const fetchArticles = async () => {
-            try {
-                const res = await getArticlesByTag(name, 1, 3);
-                const articles = res?.data?.articles || [];
-                setNewsArticles(articles.slice(0, 3));
-            } catch (err) {
-                console.error('Error fetching related articles:', err);
-                setNewsArticles([]);
-            }
-        };
-
-        fetchArticles();
-    }, [companyData.profile]);
     
     const toggleMarket = () => {
         setIsMarketOpen(prev => !prev);
     };
     
-    if (error || (!companyData.profile && !companyData.statistics)) {
+    if ((isInitialLoad && !hasShownContent) || (!initialData && loadingStates.profile && loadingStates.statistics && !companyData.profile && !companyData.statistics)) {
+        return <LoadingComponent />;
+    }
+    
+    if (error || (!companyData.profile && !companyData.statistics && !loadingStates.profile && !loadingStates.statistics)) {
         return (
             <PageWrapper>
                 <ContentWrapper>
@@ -767,29 +920,29 @@ const StockPageClient = ({ companyId, initialData }: StockPageClientProps) => {
         );
     }
     
-    const { profile, statistics, dividends, earnings, financial, holders, priceHistory } = companyData;
+    const { profile, statistics } = companyData;
     
     const about = profile?.about || {
-      company_name: 'Company',
-      ticker_symbol: '',
-      exchange_symbol: 'GSE',
-      industry: 'N/A',
-      chief_executive_officer: 'N/A',
-      number_of_employees: 'N/A',
-      headquaters: 'N/A',
-      year_founded: 'N/A',
-      isin_symbol: 'N/A',
-      company_description: 'No description available.',
-      slug: '',
-      country: 'Ghana',
-      currency: 'GHS'
+        company_name: 'Company',
+        ticker_symbol: '',
+        exchange_symbol: 'GSE',
+        industry: 'N/A',
+        chief_executive_officer: 'N/A',
+        number_of_employees: 'N/A',
+        headquaters: 'N/A',
+        year_founded: 'N/A',
+        isin_symbol: 'N/A',
+        company_description: 'No description available.',
+        slug: '',
+        country: 'Ghana',
+        currency: 'GHS'
     };
     
     const keyStats = statistics?.key_statistics || {
-      current_price: '0.00',
-      percentage_change: 0,
-      currency: 'GHS',
-      status: 'closed'
+        current_price: '0.00',
+        percentage_change: 0,
+        currency: 'GHS',
+        status: 'closed'
     };
     
     const currentPrice = keyStats.current_price || '0.00';
@@ -842,15 +995,15 @@ const StockPageClient = ({ companyId, initialData }: StockPageClientProps) => {
                     
                     <InfoContainer>
                         <TabsContainer>
-                        {['Overview', 'Financials', 'Earnings & Dividends'].map(tab => (
-                            <TabButton
-                                key={tab}
-                                $isActive={activeTab === tab}
-                                onClick={() => setActiveTab(tab)}
-                            >
-                                {tab}
-                            </TabButton>
-                        ))}
+                            {['Overview', 'Financials', 'Earnings & Dividends'].map(tab => (
+                                <TabButton
+                                    key={tab}
+                                    $isActive={activeTab === tab}
+                                    onClick={() => setActiveTab(tab)}
+                                >
+                                    {tab}
+                                </TabButton>
+                            ))}
                         </TabsContainer>
 
                         <TabContent>
@@ -863,7 +1016,7 @@ const StockPageClient = ({ companyId, initialData }: StockPageClientProps) => {
                                             financialData={companyData.financial}
                                             title="Financial Performance"
                                             companyId={companyId}
-                                            />
+                                        />
                                     </TabContentInnerGrid>
                                     
                                     <SectInfo>
@@ -925,155 +1078,161 @@ const StockPageClient = ({ companyId, initialData }: StockPageClientProps) => {
                         <HeaderText>More Stocks on GSE</HeaderText>
                     </Header>
                     <Content>
-                        <StockItem
-                          image="/assets/stocks/access.svg"
-                          label="Access Bank"
-                          code="ACCESS"
-                          value={moreStockStats['ACCESS']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['ACCESS']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/ACCESS"
-                        />
-                        <StockItem
-                          image="/assets/stocks/anglogold.svg"
-                          label="AngloGold Ashanti"
-                          code="AGA"
-                          value={moreStockStats['AADS']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['AADS']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/AADS"
-                        />
-                        <StockItem
-                          image="/assets/stocks/asante-gold.svg"
-                          label="Asante Gold"
-                          code="ASG"
-                          value={moreStockStats['ASG']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['ASG']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/ASG"
-                        />
-                        <StockItem
-                          image="/assets/stocks/atlantic-lithium.svg"
-                          label="Atlantic Lithium"
-                          code="ALLGH"
-                          value={moreStockStats['ALLGH']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['ALLGH']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/ALLGH"
-                        />
-                        <StockItem
-                          image="/assets/stocks/ecobank.svg"
-                          label="Ecobank"
-                          code="EGH"
-                          value={moreStockStats['EGH']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['EGH']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/EGH"
-                        />
-                        <StockItem
-                          image="/assets/stocks/gcb.webp"
-                          label="Ghana Commercial Bank"
-                          code="GCB"
-                          value={moreStockStats['GCB']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['GCB']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/GCB"
-                        />
-                        <StockItem
-                          image="/assets/stocks/goil.svg"
-                          label="Goil"
-                          code="GOIL"
-                          value={moreStockStats['GOIL']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['GOIL']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/GOIL"
-                        />
-                        <StockItem
-                          image="/assets/stocks/guiness.svg"
-                          label="Guinness Ghana"
-                          code="GGBL"
-                          value={moreStockStats['GGBL']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['GGBL']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/GGBL"
-                        />
-                        <StockItem
-                          image="/assets/stocks/mtn.svg"
-                          label="MTN"
-                          code="MTNGH"
-                          value={moreStockStats['MTNGH']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['MTNGH']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/MTNGH"
-                        />
-                        <StockItem
-                          image="/assets/stocks/societe-general.svg"
-                          label="Societe Generale"
-                          code="SOGEGH"
-                          value={moreStockStats['SOGEGH']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['SOGEGH']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/SOGEGH"
-                        />
-                        <StockItem
-                          image="/assets/stocks/standard-chartered.svg"
-                          label="Standard Chartered"
-                          code="SCB"
-                          value={moreStockStats['SCB']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['SCB']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/SCB"
-                        />
-                        <StockItem
-                          image="/assets/stocks/total.svg"
-                          label="TotalEnergies"
-                          code="TOTAL"
-                          value={moreStockStats['TOTAL']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['TOTAL']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/TOTAL"
-                        />
-                        <StockItem
-                          image="/assets/stocks/tullow-oil.svg"
-                          label="Tullow Oil"
-                          code="TLW"
-                          value={moreStockStats['TLW']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['TLW']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/TLW"
-                        />
-                        <StockItem
-                          image="/assets/stocks/unilever.svg"
-                          label="Unilever Ghana"
-                          code="UNIL"
-                          value={moreStockStats['UNIL']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['UNIL']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/UNIL"
-                        />
-                        <StockItem
-                          image="/assets/stocks/sic.png"
-                          label="SIC Insurance"
-                          code="SIC"
-                          value={moreStockStats['SIC']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['SIC']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/SIC"
-                        />
-                        <StockItem
-                          image="/assets/stocks/republic.webp"
-                          label="Republic Bank"
-                          code="RBGH"
-                          value={moreStockStats['RBGH']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['RBGH']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/RBGH"
-                        />
-                        <StockItem
-                          image="/assets/stocks/trustbank.jpg"
-                          label="Trust Bank Gambia"
-                          code="TBL"
-                          value={moreStockStats['TBL']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['TBL']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/TBL"
-                        />
-                        <StockItem
-                          image="/assets/stocks/fanmilk.png"
-                          label="Fan Milk"
-                          code="FML"
-                          value={moreStockStats['FML']?.key_statistics?.current_price || ' '}
-                          change={Number(moreStockStats['FML']?.key_statistics?.percentage_change ?? 0)}
-                          link="/stock/FML"
-                        />
+                        {!loadingStates.moreStocks ? (
+                            <>
+                                <StockItem
+                                    image="/assets/stocks/access.svg"
+                                    label="Access Bank"
+                                    code="ACCESS"
+                                    value={moreStockStats['ACCESS']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['ACCESS']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/ACCESS"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/anglogold.svg"
+                                    label="AngloGold Ashanti"
+                                    code="AGA"
+                                    value={moreStockStats['AADS']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['AADS']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/AADS"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/asante-gold.svg"
+                                    label="Asante Gold"
+                                    code="ASG"
+                                    value={moreStockStats['ASG']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['ASG']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/ASG"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/atlantic-lithium.svg"
+                                    label="Atlantic Lithium"
+                                    code="ALLGH"
+                                    value={moreStockStats['ALLGH']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['ALLGH']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/ALLGH"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/ecobank.svg"
+                                    label="Ecobank"
+                                    code="EGH"
+                                    value={moreStockStats['EGH']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['EGH']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/EGH"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/gcb.webp"
+                                    label="Ghana Commercial Bank"
+                                    code="GCB"
+                                    value={moreStockStats['GCB']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['GCB']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/GCB"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/goil.svg"
+                                    label="Goil"
+                                    code="GOIL"
+                                    value={moreStockStats['GOIL']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['GOIL']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/GOIL"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/guiness.svg"
+                                    label="Guinness Ghana"
+                                    code="GGBL"
+                                    value={moreStockStats['GGBL']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['GGBL']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/GGBL"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/mtn.svg"
+                                    label="MTN"
+                                    code="MTNGH"
+                                    value={moreStockStats['MTNGH']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['MTNGH']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/MTNGH"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/societe-general.svg"
+                                    label="Societe Generale"
+                                    code="SOGEGH"
+                                    value={moreStockStats['SOGEGH']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['SOGEGH']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/SOGEGH"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/standard-chartered.svg"
+                                    label="Standard Chartered"
+                                    code="SCB"
+                                    value={moreStockStats['SCB']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['SCB']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/SCB"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/total.svg"
+                                    label="TotalEnergies"
+                                    code="TOTAL"
+                                    value={moreStockStats['TOTAL']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['TOTAL']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/TOTAL"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/tullow-oil.svg"
+                                    label="Tullow Oil"
+                                    code="TLW"
+                                    value={moreStockStats['TLW']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['TLW']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/TLW"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/unilever.svg"
+                                    label="Unilever Ghana"
+                                    code="UNIL"
+                                    value={moreStockStats['UNIL']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['UNIL']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/UNIL"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/sic.png"
+                                    label="SIC Insurance"
+                                    code="SIC"
+                                    value={moreStockStats['SIC']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['SIC']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/SIC"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/republic.webp"
+                                    label="Republic Bank"
+                                    code="RBGH"
+                                    value={moreStockStats['RBGH']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['RBGH']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/RBGH"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/trustbank.jpg"
+                                    label="Trust Bank Gambia"
+                                    code="TBL"
+                                    value={moreStockStats['TBL']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['TBL']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/TBL"
+                                />
+                                <StockItem
+                                    image="/assets/stocks/fanmilk.png"
+                                    label="Fan Milk"
+                                    code="FML"
+                                    value={moreStockStats['FML']?.key_statistics?.current_price || ' '}
+                                    change={Number(moreStockStats['FML']?.key_statistics?.percentage_change ?? 0)}
+                                    link="/stock/FML"
+                                />
+                            </>
+                        ) : (
+                            <BodyLoadingComponent />
+                        )}
                     </Content>
                 </Right>
             </ContentWrapper>
         </PageWrapper>
-    )
-}
+    );
+};
 
 export default StockPageClient;

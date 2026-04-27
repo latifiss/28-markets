@@ -2,6 +2,9 @@
 
 import styled from "styled-components";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/store/app/hooks";
+import { selectCurrentUser } from "@/store/features/auth/authSlice";
 
 const Header = styled.div`
   background-color: ${({ theme }) => theme.colors.boxBg};
@@ -34,6 +37,26 @@ const BannerText = styled.div`
   font-size: 0.875rem;
   color: ${({ theme }) => theme.colors.grayText};
   line-height: 1.6;
+`;
+
+const UserMeta = styled.div`
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+`;
+
+const UserName = styled.div`
+  font-family: 'Proxima Nova', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: ${({ theme }) => theme.colors.text};
+`;
+
+const UserEmail = styled.div`
+  font-family: 'Proxima Nova', sans-serif;
+  font-size: 0.82rem;
+  color: ${({ theme }) => theme.colors.grayText};
 `;
 
 const UpgradeButton = styled.button`
@@ -77,27 +100,41 @@ const Tab = styled.button<{ active: boolean }>`
 
 export default function DashboardHeader() {
   const [activeTab, setActiveTab] = useState<"api-keys" | "access">("api-keys");
+  const router = useRouter();
+  const user = useAppSelector(selectCurrentUser);
+  const tier = user?.tier ?? "free";
+  const isPaid = tier === "pro" || tier === "business";
 
   return (
     <Header>
       <PlanBanner>
         <BannerContent>
-          <BannerTitle>Enjoying our Demo API plan?</BannerTitle>
+          <BannerTitle>{isPaid ? "Manage your plan" : "Enjoying our Demo API plan?"}</BannerTitle>
           <BannerText>
-            We would appreciate a link credit to our API from your project's website, because it will allow us to keep supplying you with high quality crypto market data. Upgrade to a paid plan today: access on-chain DEX and pool data, enjoy higher rate limits, plus other exclusive endpoints.
+            {isPaid
+              ? "Update billing, view invoices, or change your subscription tier any time."
+              : "We would appreciate a link credit to our API from your project's website, because it will allow us to keep supplying you with high quality crypto market data. Upgrade to a paid plan today: access on-chain DEX and pool data, enjoy higher rate limits, plus other exclusive endpoints."}
           </BannerText>
+          <UserMeta>
+            <UserName>{user?.name ?? "Account"}</UserName>
+            <UserEmail>{user?.email ?? "-"}</UserEmail>
+          </UserMeta>
         </BannerContent>
-        <UpgradeButton>Upgrade Plan</UpgradeButton>
+        <UpgradeButton type="button" onClick={() => router.push("/pricing")}>
+          {isPaid ? "View Pricing" : "Upgrade Plan"}
+        </UpgradeButton>
       </PlanBanner>
 
       <TabsContainer>
-        <Tab 
+        <Tab
+          type="button"
           active={activeTab === "api-keys"}
           onClick={() => setActiveTab("api-keys")}
         >
           Usage Report & API Keys
         </Tab>
-        <Tab 
+        <Tab
+          type="button"
           active={activeTab === "access"}
           onClick={() => setActiveTab("access")}
         >

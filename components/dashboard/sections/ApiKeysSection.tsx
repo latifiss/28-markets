@@ -1,9 +1,14 @@
 "use client";
 
 import styled from "styled-components";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ApiKeyTable from "../ApiKeyTable";
 import CreateApiKeyModal from "../CreateApiKeyModal";
+import { useAppSelector } from "@/store/app/hooks";
+import { selectCurrentUser } from "@/store/features/auth/authSlice";
+import { selectProfileUsage } from "@/store/features/usage/usageSlice";
+import { useGetApiKeysQuery, useGenerateApiKeyMutation, useDeleteApiKeyMutation } from "@/store/features/auth/authAPI";
+import { useGetProfileUsageQuery } from "@/store/features/usage/usageAPI";
 
 const Container = styled.div`
   display: flex;
@@ -74,33 +79,90 @@ const StatChange = styled.div<{ positive?: boolean }>`
   margin-top: 0.5rem;
 `;
 
+const DEFAULT_TIER_LIMITS: Record<string, { perMinute?: number; monthlyRequests?: number }> = {
+  free: { perMinute: 30, monthlyRequests: 10_000 },
+  pro: { perMinute: 100 },
+  business: { perMinute: 120 },
+};
+
+const formatNumber = (n: number) => new Intl.NumberFormat().format(n);
+const formatDate = (isoOrDate: string | Date) => {
+  const d = typeof isoOrDate === "string" ? new Date(isoOrDate) : isoOrDate;
+  if (Number.isNaN(d.getTime())) return "-";
+  return d.toISOString().slice(0, 10);
+};
+
 export default function ApiKeysSection() {
   const [showModal, setShowModal] = useState(false);
-  const [apiKeys, setApiKeys] = useState([
-    {
-      id: "1",
-      label: "Demo Key",
-      key: "CG-F8a***********************52k",
-      createdAt: "2025-05-31",
-    },
-  ]);
+  const user = useAppSelector(selectCurrentUser);
+  const profileUsage = useAppSelector(selectProfileUsage);
 
-  const handleCreateKey = (label: string) => {
-    const newKey = {
-      id: String(apiKeys.length + 1),
-      label,
-      key: `CG-${Math.random().toString(36).substring(2, 15)}*****`,
-      createdAt: new Date().toISOString().split("T")[0],
-    };
-    setApiKeys([...apiKeys, newKey]);
+  const isAuthed = !!user;
+
+  const now = new Date();
+  const month = now.getMonth() + 1;
+  const year = now.getFullYear();
+
+  useGetProfileUsageQuery(
+    { month, year },
+    { skip: !isAuthed },
+  );
+
+  const { data: apiKeysData, isFetching: isFetchingKeys, refetch } = useGetApiKeysQuery(undefined, { skip: !isAuthed });
+  const [generateApiKey, { isLoading: isCreatingKey }] = useGenerateApiKeyMutation();
+  const [deleteApiKey, { isLoading: isDeletingKey }] = useDeleteApiKeyMutation();
+
+  const tier = (user?.tier ?? "free") as string;
+  const tierLimits = DEFAULT_TIER_LIMITS[tier] ?? DEFAULT_TIER_LIMITS.free;
+  const isPaidTier = tier === "pro" || tier === "business";
+  const currentPeriodEnd = user?.currentPeriodEnd ?? null;
+
+  const monthlyUsed = (profileUsage?.usage ?? []).reduce((sum, u) => sum + (u.count ?? 0), 0);
+  const monthlyLimit = user?.usage?.limit ?? tierLimits.monthlyRequests ?? null;
+  const remaining = monthlyLimit != null ? Math.max(0, monthlyLimit - monthlyUsed) : null;
+
+  const apiKeys = (apiKeysData?.apiKeys ?? []).map((k) => ({
+    id: k.key, // backend delete route expects an id-like param; we pass the key string consistently
+    label: k.name,
+    key: k.key,
+    createdAt: (k.createdAt ?? "").slice(0, 10),
+  }));
+
+  const lastUsed =
+    (apiKeysData?.apiKeys ?? [])
+      .map((k) => k.lastUsed)
+      .filter(Boolean)
+      .sort()
+      .at(-1) ?? null;
+
+  const handleCreateKey = async (label: string) => {
+    await generateApiKey({ name: label }).unwrap();
+    await refetch();
     setShowModal(false);
   };
+
+  const handleDeleteKey = async (id: string) => {
+    await deleteApiKey({ keyId: id }).unwrap();
+  };
+
+  useEffect(() => {
+    if (!showModal) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setShowModal(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [showModal]);
 
   return (
     <Container>
       <SectionHeader>
         <Title>My API Keys</Title>
-        <AddKeyButton onClick={() => setShowModal(true)}>
+        <AddKeyButton
+          type="button"
+          onClick={() => setShowModal(true)}
+          disabled={isFetchingKeys || isCreatingKey || isDeletingKey}
+        >
           + Add New Key
         </AddKeyButton>
       </SectionHeader>
@@ -108,30 +170,36 @@ export default function ApiKeysSection() {
       <StatsGrid>
         <StatCard>
           <StatLabel>Total Monthly API Calls</StatLabel>
-          <StatValue>0</StatValue>
-          <StatChange>/ 10,000</StatChange>
+          <StatValue>{formatNumber(monthlyUsed)}</StatValue>
+          <StatChange>{monthlyLimit != null ? `/ ${formatNumber(monthlyLimit)}` : "/ Unlimited"}</StatChange>
         </StatCard>
         
         <StatCard>
           <StatLabel>Remaining monthly API Calls</StatLabel>
-          <StatValue>10,000</StatValue>
-          <StatChange positive>All available</StatChange>
+          <StatValue>{monthlyLimit != null ? formatNumber(remaining ?? 0) : "Unlimited"}</StatValue>
+          <StatChange positive={monthlyLimit == null || (remaining ?? 0) > 0}>
+            {monthlyLimit != null ? ((remaining ?? 0) === monthlyLimit ? "All available" : "") : "No monthly cap"}
+          </StatChange>
         </StatCard>
 
         <StatCard>
-          <StatLabel>Rate Limit - Request Per Minute</StatLabel>
-          <StatValue>30</StatValue>
-          <StatChange>requests/minute</StatChange>
+          <StatLabel>Current plan</StatLabel>
+          <StatValue>{tier}</StatValue>
+          <StatChange>
+            {isPaidTier
+              ? `Expires: ${currentPeriodEnd ? formatDate(currentPeriodEnd) : "-"}`
+              : `Reset date: ${currentPeriodEnd ? formatDate(currentPeriodEnd) : "-"}`}
+          </StatChange>
         </StatCard>
 
         <StatCard>
           <StatLabel>Last Used</StatLabel>
-          <StatValue>-</StatValue>
-          <StatChange>No usage yet</StatChange>
+          <StatValue>{lastUsed ? lastUsed.slice(0, 10) : "-"}</StatValue>
+          <StatChange>{lastUsed ? "" : "No usage yet"}</StatChange>
         </StatCard>
       </StatsGrid>
 
-      <ApiKeyTable apiKeys={apiKeys} />
+      <ApiKeyTable apiKeys={apiKeys} onDelete={handleDeleteKey} />
 
       {showModal && (
         <CreateApiKeyModal

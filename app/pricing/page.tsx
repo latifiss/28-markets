@@ -3,6 +3,12 @@
 import Image from "next/image";
 import React from "react";
 import styled from "styled-components";
+import { useRouter } from "next/navigation";
+import { useAppSelector } from "@/store/app/hooks";
+import { selectIsAuthenticated, selectCurrentUser } from "@/store/features/auth/authSlice";
+import { selectSubscription } from "@/store/features/billing/billingSlice";
+import { useGetProfileQuery } from "@/store/features/auth/authAPI";
+import { useGetSubscriptionQuery, useCreateCheckoutSessionMutation, useCreatePortalSessionMutation } from "@/store/features/billing/billingAPI";
 
 const PageWrapper = styled.div`
   min-height: 100vh;
@@ -248,53 +254,7 @@ const SpecialOfferLabel = styled.p`
   margin-bottom: 6px;
 `;
 
-const plans = [
-  {
-    name: "Free Sports API",
-    price: "$0 /mo",
-    featured: false,
-    features: [
-      "Search for sports players names",
-      "Search sports events",
-      "List League",
-      "30 requests per minute",
-      "List Seasons",
-    ],
-    ctaLabel: "Get Free API",
-    ctaVariant: "outline" as const,
-    annualNote: null,
-  },
-  {
-    name: "Single Developer",
-    price: "$9 /mo",
-    featured: true,
-    features: [
-      "2 min livescore (Soccer, NFL, NBA, MLB, NHL)",
-      "Full Premium JSON sports data",
-      "Higher data limits",
-      "100 requests per minute",
-      "YouTube sports highlight links",
-    ],
-    ctaLabel: "Premium $9 /mo",
-    ctaVariant: "primary" as const,
-    annualNote: "$90 a year (save 10%)",
-  },
-  {
-    name: "Small Business",
-    price: "$20 /mo",
-    featured: false,
-    features: [
-      "2 min livescore (Soccer, NFL, NBA, MLB, NHL)",
-      "No limit on returned data",
-      "Dedicated email support",
-      "120 requests per minute",
-      "Private API Key",
-    ],
-    ctaLabel: "Business $20 /mo",
-    ctaVariant: "primary" as const,
-    annualNote: "$200 a year (save 10%)",
-  },
-];
+type PlanTier = "free" | "pro" | "business";
 
 interface FeatureProps {
     label: string;
@@ -310,6 +270,108 @@ const FeatureComponent = ({ label }: FeatureProps) => {
 }
 
 export default function PricingPage() {
+  const router = useRouter();
+  const isAuthenticated = useAppSelector(selectIsAuthenticated);
+  const user = useAppSelector(selectCurrentUser);
+  const subscription = useAppSelector(selectSubscription);
+  const currentTier = (subscription?.tier ?? user?.tier ?? "free") as PlanTier;
+
+  useGetProfileQuery(undefined, { skip: !isAuthenticated });
+  useGetSubscriptionQuery(undefined, { skip: !isAuthenticated });
+
+  const [createCheckoutSession] = useCreateCheckoutSessionMutation();
+  const [createPortalSession] = useCreatePortalSessionMutation();
+
+  const plans = [
+    {
+      tier: "free" as const,
+      name: "Free Sports API",
+      price: "$0 /mo",
+      featured: currentTier === "free",
+      features: [
+        "Search for sports players names",
+        "Search sports events",
+        "List League",
+        "30 requests per minute",
+        "List Seasons",
+      ],
+      ctaLabel: isAuthenticated ? (currentTier === "free" ? "Current Plan" : "Switch to Free") : "Get Free API",
+      ctaVariant: "outline" as const,
+      annualNote: null,
+    },
+    {
+      tier: "pro" as const,
+      name: "Single Developer",
+      price: "$9 /mo",
+      featured: currentTier === "pro",
+      features: [
+        "2 min livescore (Soccer, NFL, NBA, MLB, NHL)",
+        "Full Premium JSON sports data",
+        "Higher data limits",
+        "100 requests per minute",
+        "YouTube sports highlight links",
+      ],
+      ctaLabel: currentTier === "pro" ? "Current Plan" : "Premium $9 /mo",
+      ctaVariant: "primary" as const,
+      annualNote: "$90 a year (save 10%)",
+    },
+    {
+      tier: "business" as const,
+      name: "Small Business",
+      price: "$20 /mo",
+      featured: currentTier === "business",
+      features: [
+        "2 min livescore (Soccer, NFL, NBA, MLB, NHL)",
+        "No limit on returned data",
+        "Dedicated email support",
+        "120 requests per minute",
+        "Private API Key",
+      ],
+      ctaLabel: currentTier === "business" ? "Current Plan" : "Business $20 /mo",
+      ctaVariant: "primary" as const,
+      annualNote: "$200 a year (save 10%)",
+    },
+  ];
+
+  const handlePlanClick = async (tier: PlanTier) => {
+    if (!isAuthenticated) {
+      router.push("/login");
+      return;
+    }
+
+    if (tier === currentTier) {
+      const portalRes = await createPortalSession().unwrap();
+      const portalUrl = portalRes?.url;
+      if (!portalUrl) {
+        window.alert("Billing portal link was not returned. Please try again.");
+        return;
+      }
+      window.location.href = portalUrl;
+      return;
+    }
+
+    if (tier === "free") {
+      router.push("/dashboard");
+      return;
+    }
+
+    const res = await createCheckoutSession({
+      tier,
+      successUrl: `${window.location.origin}/billing/callback`,
+      cancelUrl: `${window.location.origin}/pricing`,
+    }).unwrap();
+    const checkoutUrl = res?.authorization_url;
+    if (!checkoutUrl) {
+      // This helps identify the backend response shape quickly.
+      // eslint-disable-next-line no-console
+      console.warn("Checkout session response missing authorization_url:", res);
+      window.alert("Checkout link was not returned. Please try again.");
+      return;
+    }
+
+    window.location.href = checkoutUrl;
+  };
+
   return (
     <>
       <PageWrapper>
@@ -335,7 +397,14 @@ export default function PricingPage() {
                 </FeatureList>
 
                 <CardFooter>
-                  <Button $variant={plan.ctaVariant} href="#">
+                  <Button
+                    $variant={plan.ctaVariant}
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePlanClick(plan.tier);
+                    }}
+                  >
                     {plan.ctaLabel}
                   </Button>
                   {plan.annualNote && (

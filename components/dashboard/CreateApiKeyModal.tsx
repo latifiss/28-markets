@@ -6,7 +6,7 @@ import { XMarkIcon } from "@heroicons/react/24/outline";
 
 interface CreateApiKeyModalProps {
   onClose: () => void;
-  onCreate: (label: string) => void;
+  onCreate: (label: string) => void | Promise<void>;
 }
 
 const Overlay = styled.div`
@@ -156,8 +156,7 @@ export default function CreateApiKeyModal({
 
     setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      onCreate(label);
+      await onCreate(label);
     } finally {
       setLoading(false);
     }
@@ -168,7 +167,7 @@ export default function CreateApiKeyModal({
       <Modal onClick={(e) => e.stopPropagation()}>
         <Header>
           <Title>Create New API Key</Title>
-          <CloseButton onClick={onClose}>
+          <CloseButton type="button" onClick={onClose}>
             <XMarkIcon className="w-6 h-6" />
           </CloseButton>
         </Header>

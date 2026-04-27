@@ -58,6 +58,7 @@ const OverviewTable: React.FC<OverviewTableProps> = ({ companyData }) => {
   const { statistics, earnings, dividends, priceHistory } = companyData;
   
   const keyStats = statistics?.key_statistics;
+  const growthValuation = statistics?.growth_valuation;
   const earningsEvents = earnings?.events;
   const dividendEvents = dividends?.events;
   
@@ -87,13 +88,17 @@ const OverviewTable: React.FC<OverviewTableProps> = ({ companyData }) => {
   
   const avgVolume = keyStats?.volume ? formatNumber(keyStats.volume) : '--';
   
-  const marketCap = keyStats?.market_capitalization ? 
-    formatCurrency(keyStats.market_capitalization, keyStats.currency) : '--';
+  const marketCapFromGrowth = growthValuation?.market_capitalization;
+  const marketCapFromHistory = latestHistory?.market_capitalization;
+  const marketCap = marketCapFromGrowth || marketCapFromHistory || '--';
+  const formattedMarketCap = marketCap !== '--' ? formatCurrency(marketCap, keyStats?.currency || 'GHS') : '--';
   
-  const beta = '--'; 
+  const beta = '--';
   
-  const peRatio = keyStats?.price_earning_ratio ? 
-    keyStats.price_earning_ratio.toFixed(2) : '--';
+  const peRatioFromGrowth = growthValuation?.price_earning_ratio;
+  const peRatioFromHistory = latestHistory?.price_earning_ratio;
+  const peRatio = peRatioFromGrowth || peRatioFromHistory || '--';
+  const formattedPeRatio = peRatio !== '--' ? peRatio.toFixed(2) : '--';
   
   const eps = keyStats?.earnings_per_share ? 
     formatCurrency(keyStats.earnings_per_share, keyStats.currency) : '--';
@@ -173,8 +178,8 @@ const OverviewTable: React.FC<OverviewTableProps> = ({ companyData }) => {
             <TableCell>{avgVolume}</TableCell>
           </TableRow>
           <TableRow>
-            <TableHeader>Market Cap (intraday)</TableHeader>
-            <TableCell>{marketCap}</TableCell>
+            <TableHeader>Market Cap</TableHeader>
+            <TableCell>{formattedMarketCap}</TableCell>
           </TableRow>
           <TableRow>
             <TableHeader>Beta (5Y Monthly)</TableHeader>
@@ -182,7 +187,7 @@ const OverviewTable: React.FC<OverviewTableProps> = ({ companyData }) => {
           </TableRow>
           <TableRow>
             <TableHeader>PE Ratio (TTM)</TableHeader>
-            <TableCell>{peRatio}</TableCell>
+            <TableCell>{formattedPeRatio}</TableCell>
           </TableRow>
           <TableRow>
             <TableHeader>EPS (TTM)</TableHeader>

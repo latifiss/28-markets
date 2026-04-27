@@ -3,12 +3,8 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import rootReducer, { RootState } from './rootReducer';
 import { authApi } from '../features/auth/authAPI';
-import { articleApi } from '../features/article/articleAPI';
-import { reviewApi } from '../features/review/reviewAPI';
-import { featureApi } from '../features/feature/featureAPI';
-import { movieApi } from '../features/movie/movieAPI';
-import { musicApi } from '../features/music/musicAPI';
-import { opinionApi } from '../features/opinion/opinionAPI';
+import { usageApi } from '../features/usage/usageAPI';
+import { billingApi } from '../features/billing/billingAPI';
 
 const persistConfig = {
   key: 'root',
@@ -29,12 +25,8 @@ export const setupStore = () => {
         },
       }).concat(
         authApi.middleware,
-        articleApi.middleware,
-        reviewApi.middleware,
-        featureApi.middleware,
-        movieApi.middleware,
-        musicApi.middleware,
-        opinionApi.middleware,
+        usageApi.middleware,
+        billingApi.middleware,
       ),
     devTools: process.env.NODE_ENV !== 'production',
   });
