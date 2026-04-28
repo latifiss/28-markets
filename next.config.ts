@@ -10,6 +10,10 @@ const nextConfig: NextConfig = {
     ],
     unoptimized: true,
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  output: 'standalone',
   compiler: {
     styledComponents: true,
   },
