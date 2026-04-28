@@ -59,7 +59,7 @@ export const getAllCryptos = async () => {
 };
 
 export const getCryptoById = async (id: string) => {
-  const res = await axios.get(`${BASE_URL}/crypto/crypto/id/${id}`);
+  const res = await axios.get(`${BASE_URL}/crypto/id/${id}`);
   // API shape: { success, code, fromCache, data: {...} }
   return res.data?.data ?? res.data ?? null;
 };
@@ -77,13 +77,13 @@ export const getIndexByCode = async (code: string) => {
 };
 
 export const getAllForex = async () => {
-  const res = await axios.get(`${BASE_URL}/forex/forex`);
+  const res = await axios.get(`${BASE_URL}/forex`);
   // API shape: { success, code, fromCache, data: {...} }
   return res.data?.data ?? res.data ?? null;
 };
 
 export const getForexByCode = async (code: string) => {
-  const res = await axios.get(`${BASE_URL}/forex/forex/${code}`);
+  const res = await axios.get(`${BASE_URL}/forex/${code}`);
   // API shape: { success, code, fromCache, data: {...} }
   return res.data?.data ?? res.data ?? null;
 };
