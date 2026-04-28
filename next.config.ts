@@ -18,6 +18,7 @@ const nextConfig: NextConfig = {
     styledComponents: true,
   },
   turbopack: {},
+  skipTrailingSlashRedirect: true,
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -37,6 +38,9 @@ const nextConfig: NextConfig = {
       ];
     }
     return config;
+  },
+  experimental: {
+    prerenderEarlyExit: false,
   },
 };
 

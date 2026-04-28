@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useLazyVerifyPaymentQuery } from "@/store/features/billing/billingAPI";
 
-export default function BillingCallbackPage() {
+function CallbackContent() {
   const router = useRouter();
   const params = useSearchParams();
   const [verifyPayment] = useLazyVerifyPaymentQuery();
@@ -41,5 +41,17 @@ export default function BillingCallbackPage() {
     <main style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
       <p>Processing payment confirmation...</p>
     </main>
+  );
+}
+
+export default function BillingCallbackPage() {
+  return (
+    <Suspense fallback={
+      <main style={{ minHeight: "100vh", display: "grid", placeItems: "center" }}>
+        <p>Loading payment confirmation...</p>
+      </main>
+    }>
+      <CallbackContent />
+    </Suspense>
   );
 }
