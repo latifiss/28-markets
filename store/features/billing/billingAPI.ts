@@ -71,7 +71,7 @@ const normalizePortalSessionResponse = (raw: unknown): PortalSessionResponse => 
 export const billingApi = createApi({
   reducerPath: 'billingApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:6060/api/billing',
+    baseUrl: 'https://api.28-markets.com/api/billing',
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;
       const token = state?.auth?.token;

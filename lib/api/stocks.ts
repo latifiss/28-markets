@@ -3,7 +3,7 @@ import axios from 'axios';
 // Match backend routes: http://afx.21centurynews.com/api/stocks/equity/...
 // const BASE_URL = 'http://marketsapi.21centurynews.com/api/stocks/equity';
 
-const BASE_URL = 'http://localhost:6060/api/stocks/equity';
+const BASE_URL = 'https://api.28-markets.com/api/stocks/equity';
 
 export interface AboutSchema {
   company_name: string;

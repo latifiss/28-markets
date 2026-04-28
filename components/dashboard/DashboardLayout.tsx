@@ -13,6 +13,7 @@ import { useGetProfileUsageQuery } from "@/store/features/usage/usageAPI";
 const Container = styled.div`
   display: flex;
   height: 100vh;
+  padding-top: 16px;
   background-color: ${({ theme }) => theme.colors.background};
 `;
 

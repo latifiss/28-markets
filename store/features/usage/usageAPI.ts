@@ -16,7 +16,7 @@ import {
 export const usageApi = createApi({
   reducerPath: 'usageApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:6060/api/usage',
+    baseUrl: 'https://api.28-markets.com/api/usage',
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;
       const token = state?.auth?.token;

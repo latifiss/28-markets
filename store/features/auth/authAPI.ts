@@ -90,7 +90,7 @@ interface ProfileResponse {
 export const authApi = createApi({
   reducerPath: 'authApi',
   baseQuery: fetchBaseQuery({
-    baseUrl: 'http://localhost:6060/api/auth',
+    baseUrl: 'https://api.28-markets.com/api/auth',
     prepareHeaders: (headers, { getState }) => {
       const state = getState() as RootState;
       const token = state?.auth?.token;
