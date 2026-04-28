@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = 'http://afx.21centurynews.com/api'; 
+const BASE_URL = 'https://api.28-markets.com/api'; 
 
 export const getAllCompanies = async () => {
   const res = await axios.get(`${BASE_URL}/company`);
