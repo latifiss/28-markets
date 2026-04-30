@@ -113,7 +113,7 @@ export default function DashboardHeader() {
           <BannerText>
             {isPaid
               ? "Update billing, view invoices, or change your subscription tier any time."
-              : "We would appreciate a link credit to our API from your project's website, because it will allow us to keep supplying you with high quality crypto market data. Upgrade to a paid plan today: access on-chain DEX and pool data, enjoy higher rate limits, plus other exclusive endpoints."}
+              : "We would appreciate a link credit to our API from your project's website, because it will allow us to keep supplying you with high quality crypto market data. Upgrade to a paid plan today for other exclusive endpoints."}
           </BannerText>
           <UserMeta>
             <UserName>{user?.name ?? "Account"}</UserName>
