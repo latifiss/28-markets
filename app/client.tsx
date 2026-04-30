@@ -14,7 +14,7 @@ import {
   getCryptoById
 } from '@/lib/api/markets';
 import { getArticlesByTag } from '@/lib/api/articles';
-import LoadingComponent from './loading';
+import LoadingComponent from './markets/loading';
 import { BOGItem } from '@/components/bogItem';
 
 const PageWrapper = styled.div`

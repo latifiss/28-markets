@@ -17,7 +17,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body style={{ 
+        maxWidth: '100%', 
+        overflowX: 'hidden', 
+        position: 'relative',
+        margin: 0,
+        padding: 0
+      }}>
         <StyledComponentsRegistry>
           <Providers>
             <ProgressBar />

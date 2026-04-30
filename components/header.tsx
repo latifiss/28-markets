@@ -88,7 +88,7 @@ const TopRow = styled.div`
   padding: 0px 30px;
 
   @media (max-width: 576px) {
-    padding: 0px 16px;
+    padding: 0px 0px;
   }
 
   @media (min-width: 577px) and (max-width: 768px) {
@@ -108,7 +108,7 @@ const Logo = styled(Image)`
   object-fit: contain;
 
   @media (max-width: 576px) {
-    height: 35px;
+    height: 28px;
   }
 
   @media (min-width: 577px) and (max-width: 768px) {
