@@ -332,13 +332,7 @@ export default function PricingPage() {
     }
 
     if (tier === currentTier) {
-      const portalRes = await createPortalSession().unwrap();
-      const portalUrl = portalRes?.url;
-      if (!portalUrl) {
-        window.alert("Billing portal link was not returned. Please try again.");
-        return;
-      }
-      window.location.href = portalUrl;
+      window.alert(`You are already on the ${tier} plan. No changes needed.`);
       return;
     }
 
@@ -354,8 +348,6 @@ export default function PricingPage() {
     }).unwrap();
     const checkoutUrl = res?.authorization_url;
     if (!checkoutUrl) {
-      // This helps identify the backend response shape quickly.
-      // eslint-disable-next-line no-console
       console.warn("Checkout session response missing authorization_url:", res);
       window.alert("Checkout link was not returned. Please try again.");
       return;
