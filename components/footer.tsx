@@ -27,7 +27,7 @@ const Top = styled.div`
 `
 
 const Bottom = styled.div`
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     width: 70%;
@@ -104,7 +104,7 @@ const Footer = () => {
       <Component>
           <Top>
               <PageInfo>
-                  <PageTitle>2016 - 2026 TheSportsDB.com</PageTitle>
+                <PageTitle>© 2026 28-markets.com</PageTitle>
               </PageInfo>
           </Top>
           <Bottom>
