@@ -166,6 +166,7 @@ const NoteBox = styled.div`
 
 const NoteBoxStrong = styled.strong`
   font-family: 'Proxima Nova', sans-serif;
+  color: ${({ theme }) => theme.colors.text};
 `;
 
 const NoteBoxParagraph = styled.p`
