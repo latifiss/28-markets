@@ -67,7 +67,6 @@ const Paragraph = styled.p`
 const CodeBlock = styled.div`
   background: ${({ theme }) => theme.colors.boxBg || "#f5f5f5"};
   border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 6px;
   padding: 16px;
   margin: 16px 0;
   overflow-x: auto;
@@ -84,7 +83,6 @@ const InlineCode = styled.code`
   font-size: 14px;
   background: ${({ theme }) => theme.colors.boxBg || "#f5f5f5"};
   padding: 2px 6px;
-  border-radius: 4px;
   color: ${({ theme }) => theme.colors.select || "#2e7d32"};
 `;
 
@@ -124,7 +122,6 @@ const EndpointTable = styled.table`
 const MethodBadge = styled.span<{ method: string }>`
   display: inline-block;
   padding: 4px 10px;
-  border-radius: 4px;
   font-size: 12px;
   font-weight: 700;
   font-family: 'Proxima Nova', sans-serif;
@@ -164,7 +161,6 @@ const NoteBox = styled.div`
   border-left: 4px solid ${({ theme }) => theme.colors.select || "#2e7d32"};
   padding: 16px;
   margin: 20px 0;
-  border-radius: 4px;
   font-family: 'Proxima Nova', sans-serif;
 `;
 
@@ -178,6 +174,22 @@ const NoteBoxParagraph = styled.p`
   color: ${({ theme }) => theme.colors.grayText || "#666"};
 `;
 
+const Button = styled.a`
+  display: inline-block;
+  background: ${({ theme }) => theme.colors.select || "#2e7d32"};
+  color: white;
+  padding: 12px 24px;
+  text-decoration: none;
+  font-weight: 600;
+  margin-top: 8px;
+  font-family: 'Proxima Nova', sans-serif;
+  transition: opacity 0.2s;
+  
+  &:hover {
+    opacity: 0.9;
+  }
+`;
+
 export default function FinancialDocsPage() {
   return (
     <PageWrapper>
@@ -186,19 +198,57 @@ export default function FinancialDocsPage() {
         
         <Paragraph>
           Welcome to the API documentation - your comprehensive source for real-time and historical 
-          financial market data. Our API provides access to commodities, currencies, forex rates, treasury yields, stock prices, and global market indexes.
+          financial market data. Our API provides access to commodities, cryptocurrencies, forex rates, stock prices, and global market indexes.
         </Paragraph>
 
         <BaseUrlBox>
           <BaseUrlStrong>Base URL:</BaseUrlStrong>
-          <BaseUrlCode>https://api.financialdata.com/api/v1</BaseUrlCode>
+          <BaseUrlCode>https://api.28-markets.com/api</BaseUrlCode>
         </BaseUrlBox>
+
+        {/* Authentication Section */}
+        <Section>
+          <SectionTitle>Authentication</SectionTitle>
+          <Paragraph>
+            All API endpoints require a valid API key for authentication. You can obtain your API key by subscribing to a plan on our <a href="/pricing" style={{ color: "#2e7d32", textDecoration: "underline" }}>Pricing page</a>. Once you have your API key, you can include it in your requests in two ways:
+          </Paragraph>
+          
+          <SubSectionTitle>Method</SubSectionTitle>
+          <CodeBlock>{`
+fetch('https://api.28-markets.com/api/commodity/', {
+  headers: {
+    'X-API-Key': 'your_api_key_here'
+  }
+})
+.then(response => response.json())
+.then(data => console.log(data));`}</CodeBlock>
+
+          <SubSectionTitle>cURL Example</SubSectionTitle>
+          <CodeBlock>{`
+curl -X GET "https://api.28-markets.com/api/commodity/" \\
+  -H "X-API-Key: your_api_key_here"
+
+# Get specific commodity
+curl -X GET "https://api.28-markets.com/api/commodity/GOLD" \\
+  -H "X-API-Key: your_api_key_here"`}</CodeBlock>
+
+          <NoteBox>
+            <NoteBoxStrong>💡 Get Your API Key:</NoteBoxStrong>
+            <NoteBoxParagraph>
+              Visit our <a href="/pricing" style={{ color: "#2e7d32", textDecoration: "underline" }}>Pricing page</a> to subscribe to a plan and get your unique API key immediately.
+            </NoteBoxParagraph>
+            <div style={{ marginTop: "12px" }}>
+              <Button href="/pricing">Get API Key →</Button>
+            </div>
+          </NoteBox>
+        </Section>
 
         {/* Commodities Section */}
         <Section>
           <SectionTitle>Commodities</SectionTitle>
           <Paragraph>
             Access real-time and historical commodity prices including gold, silver, oil, natural gas, copper, and agricultural products.
+            All endpoints require API key authentication and are rate-limited.
           </Paragraph>
           
           <SubSectionTitle>Endpoints</SubSectionTitle>
@@ -208,28 +258,28 @@ export default function FinancialDocsPage() {
             </thead>
             <tbody>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/commodities</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/commodity/</InlineCode></td>
                 <td>Get all commodities with their current prices</td>
                 <td>None</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/commodities/:code</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/commodity/:code</InlineCode></td>
                 <td>Get a specific commodity by its code</td>
                 <td><InlineCode>code</InlineCode> - Commodity code (e.g., GOLD, SILVER, OIL)</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/commodities/:code/history</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/commodity/:code/history</InlineCode></td>
                 <td>Get complete price history for a commodity</td>
                 <td><InlineCode>code</InlineCode> - Commodity code</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/commodities/:code/history/period/:period</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/commodity/:code/history/period/:period</InlineCode></td>
                 <td>Get price history for a specific time period</td>
                 <td><InlineCode>code</InlineCode> - Commodity code<br/>
                 <InlineCode>period</InlineCode> - Time period (e.g., 1d, 1w, 1m, 3m, 6m, 1y)</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/commodities/:code/history/latest</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/commodity/:code/history/latest</InlineCode></td>
                 <td>Get the latest price entry for a commodity</td>
                 <td><InlineCode>code</InlineCode> - Commodity code</td>
               </tr>
@@ -254,11 +304,12 @@ export default function FinancialDocsPage() {
 }`}</CodeBlock>
         </Section>
 
-        {/* Forex Section */}
+        {/* Cryptocurrencies Section */}
         <Section>
-          <SectionTitle>Currencies (Forex)</SectionTitle>
+          <SectionTitle>Cryptocurrencies</SectionTitle>
           <Paragraph>
-            Live and historical foreign exchange rates for major and minor currency pairs.
+            Live and historical cryptocurrency data including prices, market caps, volume, and comprehensive market analysis.
+            All endpoints require API key authentication and are rate-limited.
           </Paragraph>
           
           <SubSectionTitle>Endpoints</SubSectionTitle>
@@ -268,28 +319,136 @@ export default function FinancialDocsPage() {
             </thead>
             <tbody>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/forex</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/</InlineCode></td>
+                <td>Get all cryptocurrencies with current prices</td>
+                <td>None</td>
+              </tr>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/symbol/:symbol</InlineCode></td>
+                <td>Get a specific cryptocurrency by symbol</td>
+                <td><InlineCode>symbol</InlineCode> - Crypto symbol (e.g., BTC, ETH, SOL)</td>
+              </tr>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/id/:id</InlineCode></td>
+                <td>Get a specific cryptocurrency by database ID</td>
+                <td><InlineCode>id</InlineCode> - Database ID</td>
+              </tr>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/:symbol/history</InlineCode></td>
+                <td>Get price history for a cryptocurrency</td>
+                <td><InlineCode>symbol</InlineCode> - Crypto symbol</td>
+              </tr>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/:symbol/comprehensive</InlineCode></td>
+                <td>Get comprehensive data for a cryptocurrency</td>
+                <td><InlineCode>symbol</InlineCode> - Crypto symbol</td>
+              </tr>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coingainers</InlineCode></td>
+                <td>Get all coin gainers</td>
+                <td>None</td>
+              </tr>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coingainers/top</InlineCode></td>
+                <td>Get top gaining cryptocurrencies</td>
+                <td>None</td>
+              </tr>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coingainers/losers</InlineCode></td>
+                <td>Get top losing cryptocurrencies</td>
+                <td>None</td>
+              </tr>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coingainers/:symbol</InlineCode></td>
+                <td>Get a specific coin gainer by symbol</td>
+                <td><InlineCode>symbol</InlineCode> - Crypto symbol</td>
+              </tr>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coinlosers</InlineCode></td>
+                <td>Get all coin losers</td>
+                <td>None</td>
+              </tr>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coinlosers/top</InlineCode></td>
+                <td>Get top losing cryptocurrencies</td>
+                <td>None</td>
+              </tr>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coinlosers/:symbol</InlineCode></td>
+                <td>Get a specific coin loser by symbol</td>
+                <td><InlineCode>symbol</InlineCode> - Crypto symbol</td>
+              </tr>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coin-history</InlineCode></td>
+                <td>Get all coin history records</td>
+                <td>None</td>
+              </tr>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coin-history/:symbol</InlineCode></td>
+                <td>Get coin history for a specific symbol</td>
+                <td><InlineCode>symbol</InlineCode> - Crypto symbol</td>
+              </tr>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coin-history/:symbol/stats</InlineCode></td>
+                <td>Get statistics for a coin's history</td>
+                <td><InlineCode>symbol</InlineCode> - Crypto symbol</td>
+              </tr>
+            </tbody>
+          </EndpointTable>
+
+          <SubSectionTitle>Example Response</SubSectionTitle>
+          <CodeBlock>{`{
+  "status": "success",
+  "data": {
+    "symbol": "BTC",
+    "name": "Bitcoin",
+    "current_price": 43250.75,
+    "change_24h": 1250.30,
+    "change_percent_24h": 2.98,
+    "market_cap": 850000000000,
+    "volume_24h": 25000000000,
+    "updated_at": "2024-01-15T14:30:00Z"
+  }
+}`}</CodeBlock>
+        </Section>
+
+        {/* Forex Section */}
+        <Section>
+          <SectionTitle>Currencies (Forex)</SectionTitle>
+          <Paragraph>
+            Live and historical foreign exchange rates for major and minor currency pairs.
+            All endpoints require API key authentication and are rate-limited.
+          </Paragraph>
+          
+          <SubSectionTitle>Endpoints</SubSectionTitle>
+          <EndpointTable>
+            <thead>
+              <tr><th>Endpoint</th><th>Description</th><th>Parameters</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/forex/currency/</InlineCode></td>
                 <td>Get all forex currency pairs with current rates</td>
                 <td>None</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/forex/:code</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/forex/currency/:code</InlineCode></td>
                 <td>Get a specific forex pair by its code</td>
                 <td><InlineCode>code</InlineCode> - Currency pair (e.g., EURUSD, GBPUSD, USDJPY)</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/forex/:code/history</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/forex/currency/:code/history</InlineCode></td>
                 <td>Get complete exchange rate history for a currency pair</td>
                 <td><InlineCode>code</InlineCode> - Currency pair code</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/forex/:code/history/period/:period</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/forex/currency/:code/history/period/:period</InlineCode></td>
                 <td>Get exchange rate history for a specific time period</td>
                 <td><InlineCode>code</InlineCode> - Currency pair code<br/>
                 <InlineCode>period</InlineCode> - Time period (e.g., 1d, 1w, 1m, 3m, 6m, 1y)</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/forex/:code/history/latest</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/forex/currency/:code/history/latest</InlineCode></td>
                 <td>Get the latest exchange rate entry for a currency pair</td>
                 <td><InlineCode>code</InlineCode> - Currency pair code</td>
               </tr>
@@ -312,127 +471,12 @@ export default function FinancialDocsPage() {
 }`}</CodeBlock>
         </Section>
 
-        {/* Interbank Forex Section */}
-        <Section>
-          <SectionTitle>Interbank Forex (Bank of Ghana Rates)</SectionTitle>
-          <Paragraph>
-            Average exchange rates between banks provided by the Bank of Ghana. These represent the interbank market rates.
-          </Paragraph>
-          
-          <SubSectionTitle>Endpoints</SubSectionTitle>
-          <EndpointTable>
-            <thead>
-              <tr><th>Endpoint</th><th>Description</th><th>Parameters</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/interbank-pairs</InlineCode></td>
-                <td>Get all interbank currency pairs</td>
-                <td>None</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/interbank-pairs/:id</InlineCode></td>
-                <td>Get an interbank pair by its database ID</td>
-                <td><InlineCode>id</InlineCode> - Database ID of the interbank pair</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/interbank-pairs/code/:code</InlineCode></td>
-                <td>Get an interbank pair by currency code</td>
-                <td><InlineCode>code</InlineCode> - Currency code (e.g., USD, EUR, GBP)</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/interbank-pairs/bank/:bankCode</InlineCode></td>
-                <td>Get interbank rates for a specific bank</td>
-                <td><InlineCode>bankCode</InlineCode> - Bank identifier code</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/interbank-pairs/:id/history</InlineCode></td>
-                <td>Get price history for an interbank pair</td>
-                <td><InlineCode>id</InlineCode> - Interbank pair ID</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/price-history/:bankCode/period/:period</InlineCode></td>
-                <td>Get price history for a bank over a specific period</td>
-                <td><InlineCode>bankCode</InlineCode> - Bank code<br/>
-                <InlineCode>period</InlineCode> - Time period (e.g., 1d, 1w, 1m)</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/price-history/:bankCode/latest</InlineCode></td>
-                <td>Get the latest price history entry for a bank</td>
-                <td><InlineCode>bankCode</InlineCode> - Bank code</td>
-              </tr>
-            </tbody>
-          </EndpointTable>
-
-          <SubSectionTitle>Example Response</SubSectionTitle>
-          <CodeBlock>{`{
-  "status": "success",
-  "data": {
-    "code": "USD",
-    "bank_code": "BOG",
-    "bid_rate": 12.45,
-    "ask_rate": 12.50,
-    "mid_rate": 12.475,
-    "change": 0.05,
-    "change_percent": 0.40,
-    "updated_at": "2024-01-15T14:30:00Z"
-  }
-}`}</CodeBlock>
-        </Section>
-
-        {/* Indexes Section */}
-        <Section>
-          <SectionTitle>Market Indexes</SectionTitle>
-          <Paragraph>
-            Major global market indexes including FTSE 100, GSE Composite, S&P 500, Dow Jones, NASDAQ, DAX, and Nikkei.
-          </Paragraph>
-          
-          <SubSectionTitle>Endpoints</SubSectionTitle>
-          <EndpointTable>
-            <thead>
-              <tr><th>Endpoint</th><th>Description</th><th>Parameters</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/indices</InlineCode></td>
-                <td>Get all market indexes with current values</td>
-                <td>None</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/indices/:code</InlineCode></td>
-                <td>Get a specific index by its code</td>
-                <td><InlineCode>code</InlineCode> - Index code (e.g., FTSE100, GSE, SPX)</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/indices/:code/history</InlineCode></td>
-                <td>Get historical data for a specific index</td>
-                <td><InlineCode>code</InlineCode> - Index code</td>
-              </tr>
-            </tbody>
-          </EndpointTable>
-
-          <SubSectionTitle>Example Response</SubSectionTitle>
-          <CodeBlock>{`{
-  "status": "success",
-  "data": {
-    "code": "GSE",
-    "name": "Ghana Stock Exchange Composite Index",
-    "value": 3450.25,
-    "change": 15.50,
-    "change_percent": 0.45,
-    "previous_close": 3434.75,
-    "high_52week": 3600.00,
-    "low_52week": 3200.50,
-    "updated_at": "2024-01-15T16:00:00Z"
-  }
-}`}</CodeBlock>
-        </Section>
-
-        {/* Stocks / Equity Section */}
+        {/* Stocks Section */}
         <Section>
           <SectionTitle>Stocks & Equity</SectionTitle>
           <Paragraph>
             Comprehensive stock market data including company profiles, statistics, dividends, earnings, financials, and price history.
+            All endpoints require API key authentication and are rate-limited.
           </Paragraph>
           
           <SubSectionTitle>Company Information Endpoints</SubSectionTitle>
@@ -442,37 +486,37 @@ export default function FinancialDocsPage() {
             </thead>
             <tbody>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/profiles/:company_id</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/profiles/:company_id</InlineCode></td>
                 <td>Get company profile information</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/statistics/:company_id</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/statistics/:company_id</InlineCode></td>
                 <td>Get company statistics (P/E ratio, market cap, etc.)</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/dividends/:company_id</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/dividends/:company_id</InlineCode></td>
                 <td>Get dividend history for a company</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/earnings/:company_id</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/earnings/:company_id</InlineCode></td>
                 <td>Get earnings reports for a company</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/financial/:company_id</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/financial/:company_id</InlineCode></td>
                 <td>Get financial statements for a company</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/holders/:company_id</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/holders/:company_id</InlineCode></td>
                 <td>Get institutional and insider holdings</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/company/:company_id/all</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/company/:company_id/all</InlineCode></td>
                 <td>Get all data for a company in one request</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
@@ -486,57 +530,57 @@ export default function FinancialDocsPage() {
             </thead>
             <tbody>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/price-history/:company_id</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id</InlineCode></td>
                 <td>Get complete price history for a company</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/price-history/:company_id/24h</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/24h</InlineCode></td>
                 <td>Get price history for last 24 hours</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/price-history/:company_id/1w</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/1w</InlineCode></td>
                 <td>Get price history for last week</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/price-history/:company_id/3m</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/3m</InlineCode></td>
                 <td>Get price history for last 3 months</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/price-history/:company_id/6m</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/6m</InlineCode></td>
                 <td>Get price history for last 6 months</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/price-history/:company_id/ytd</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/ytd</InlineCode></td>
                 <td>Get price history from year to date</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/price-history/:company_id/1y</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/1y</InlineCode></td>
                 <td>Get price history for last year</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/price-history/:company_id/2y</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/2y</InlineCode></td>
                 <td>Get price history for last 2 years</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/price-history/:company_id/5y</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/5y</InlineCode></td>
                 <td>Get price history for last 5 years</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/price-history/:company_id/10y</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/10y</InlineCode></td>
                 <td>Get price history for last 10 years</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/price-history/:company_id/all</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/all</InlineCode></td>
                 <td>Get all-time price history</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
               </tr>
@@ -550,27 +594,27 @@ export default function FinancialDocsPage() {
             </thead>
             <tbody>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/exchange/:exchangeSymbol/top-gainers</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/exchange/:exchangeSymbol/top-gainers</InlineCode></td>
                 <td>Get top gaining stocks on an exchange</td>
                 <td><InlineCode>exchangeSymbol</InlineCode> - Exchange symbol (e.g., GSE, NYSE, NASDAQ)</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/exchange/:exchangeSymbol/top-losers</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/exchange/:exchangeSymbol/top-losers</InlineCode></td>
                 <td>Get top losing stocks on an exchange</td>
                 <td><InlineCode>exchangeSymbol</InlineCode> - Exchange symbol</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/exchange/:exchangeSymbol/performance-by-industry</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/exchange/:exchangeSymbol/performance-by-industry</InlineCode></td>
                 <td>Get performance metrics grouped by industry</td>
                 <td><InlineCode>exchangeSymbol</InlineCode> - Exchange symbol</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/exchange/:exchangeSymbol/market-movers</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/exchange/:exchangeSymbol/market-movers</InlineCode></td>
                 <td>Get stocks with highest volume and activity</td>
                 <td><InlineCode>exchangeSymbol</InlineCode> - Exchange symbol</td>
               </tr>
               <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/equity/gse/status</InlineCode></td>
+                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/gse/status</InlineCode></td>
                 <td>Get current market status for GSE</td>
                 <td>None</td>
               </tr>
@@ -595,64 +639,10 @@ export default function FinancialDocsPage() {
 }`}</CodeBlock>
         </Section>
 
-        {/* Treasury Section */}
-        <Section>
-          <SectionTitle>Treasury Bonds</SectionTitle>
-          <Paragraph>
-            Government bond yields, treasury bills, notes, bonds, and yield curve data.
-          </Paragraph>
-          
-          <SubSectionTitle>Endpoints</SubSectionTitle>
-          <EndpointTable>
-            <thead>
-              <tr><th>Endpoint</th><th>Description</th><th>Parameters</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/treasury</InlineCode></td>
-                <td>Get all treasury bonds and bills</td>
-                <td>None</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/treasury/active</InlineCode></td>
-                <td>Get currently active treasury bonds</td>
-                <td>None</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/treasury/highest-yielding</InlineCode></td>
-                <td>Get bonds with the highest yields</td>
-                <td>None</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/treasury/:id</InlineCode></td>
-                <td>Get a specific treasury bond by ID</td>
-                <td><InlineCode>id</InlineCode> - Treasury bond identifier</td>
-              </tr>
-            </tbody>
-          </EndpointTable>
-
-          <SubSectionTitle>Example Response</SubSectionTitle>
-          <CodeBlock>{`{
-  "status": "success",
-  "data": {
-    "id": "TB-2024-001",
-    "name": "Government of Ghana 5-Year Bond",
-    "face_value": 1000,
-    "coupon_rate": 14.5,
-    "yield_to_maturity": 15.2,
-    "maturity_date": "2029-01-15",
-    "issue_date": "2024-01-15",
-    "days_to_maturity": 1825,
-    "current_price": 985.50,
-    "updated_at": "2024-01-15T14:30:00Z"
-  }
-}`}</CodeBlock>
-        </Section>
-
         <NoteBox>
-          <NoteBoxStrong>📝 Note:</NoteBoxStrong>
+          <NoteBoxStrong>🔐 Authentication & Rate Limits:</NoteBoxStrong>
           <NoteBoxParagraph>
-            All GET endpoints accept an optional <InlineCode>?api_key=YOUR_API_KEY</InlineCode> query parameter or you can include it in the request headers as <InlineCode>X-API-Key</InlineCode>. Rate limits apply based on your subscription tier.
+            All GET endpoints require API key authentication. You must include your API key in the request headers. Rate limits apply based on your subscription tier. Visit our <a href="/pricing" style={{ color: "#2e7d32", textDecoration: "underline" }}>Pricing page</a> for detailed rate limit information.
           </NoteBoxParagraph>
         </NoteBox>
       </Main>
