@@ -279,11 +279,6 @@ curl -X GET "https://api.28-markets.com/api/commodity/GOLD" \\
                 <td><InlineCode>code</InlineCode> - Commodity code<br/>
                 <InlineCode>period</InlineCode> - Time period (e.g., 1d, 1w, 1m, 3m, 6m, 1y)</td>
               </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/commodity/:code/history/latest</InlineCode></td>
-                <td>Get the latest price entry for a commodity</td>
-                <td><InlineCode>code</InlineCode> - Commodity code</td>
-              </tr>
             </tbody>
           </EndpointTable>
 
@@ -339,61 +334,6 @@ curl -X GET "https://api.28-markets.com/api/commodity/GOLD" \\
                 <td>Get price history for a cryptocurrency</td>
                 <td><InlineCode>symbol</InlineCode> - Crypto symbol</td>
               </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/:symbol/comprehensive</InlineCode></td>
-                <td>Get comprehensive data for a cryptocurrency</td>
-                <td><InlineCode>symbol</InlineCode> - Crypto symbol</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coingainers</InlineCode></td>
-                <td>Get all coin gainers</td>
-                <td>None</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coingainers/top</InlineCode></td>
-                <td>Get top gaining cryptocurrencies</td>
-                <td>None</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coingainers/losers</InlineCode></td>
-                <td>Get top losing cryptocurrencies</td>
-                <td>None</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coingainers/:symbol</InlineCode></td>
-                <td>Get a specific coin gainer by symbol</td>
-                <td><InlineCode>symbol</InlineCode> - Crypto symbol</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coinlosers</InlineCode></td>
-                <td>Get all coin losers</td>
-                <td>None</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coinlosers/top</InlineCode></td>
-                <td>Get top losing cryptocurrencies</td>
-                <td>None</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coinlosers/:symbol</InlineCode></td>
-                <td>Get a specific coin loser by symbol</td>
-                <td><InlineCode>symbol</InlineCode> - Crypto symbol</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coin-history</InlineCode></td>
-                <td>Get all coin history records</td>
-                <td>None</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coin-history/:symbol</InlineCode></td>
-                <td>Get coin history for a specific symbol</td>
-                <td><InlineCode>symbol</InlineCode> - Crypto symbol</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/crypto/coin/coin-history/:symbol/stats</InlineCode></td>
-                <td>Get statistics for a coin's history</td>
-                <td><InlineCode>symbol</InlineCode> - Crypto symbol</td>
-              </tr>
             </tbody>
           </EndpointTable>
 
@@ -447,11 +387,6 @@ curl -X GET "https://api.28-markets.com/api/commodity/GOLD" \\
                 <td>Get exchange rate history for a specific time period</td>
                 <td><InlineCode>code</InlineCode> - Currency pair code<br/>
                 <InlineCode>period</InlineCode> - Time period (e.g., 1d, 1w, 1m, 3m, 6m, 1y)</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/forex/currency/:code/history/latest</InlineCode></td>
-                <td>Get the latest exchange rate entry for a currency pair</td>
-                <td><InlineCode>code</InlineCode> - Currency pair code</td>
               </tr>
             </tbody>
           </EndpointTable>
@@ -534,90 +469,6 @@ curl -X GET "https://api.28-markets.com/api/commodity/GOLD" \\
                 <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id</InlineCode></td>
                 <td>Get complete price history for a company</td>
                 <td><InlineCode>company_id</InlineCode> - Company identifier</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/24h</InlineCode></td>
-                <td>Get price history for last 24 hours</td>
-                <td><InlineCode>company_id</InlineCode> - Company identifier</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/1w</InlineCode></td>
-                <td>Get price history for last week</td>
-                <td><InlineCode>company_id</InlineCode> - Company identifier</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/3m</InlineCode></td>
-                <td>Get price history for last 3 months</td>
-                <td><InlineCode>company_id</InlineCode> - Company identifier</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/6m</InlineCode></td>
-                <td>Get price history for last 6 months</td>
-                <td><InlineCode>company_id</InlineCode> - Company identifier</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/ytd</InlineCode></td>
-                <td>Get price history from year to date</td>
-                <td><InlineCode>company_id</InlineCode> - Company identifier</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/1y</InlineCode></td>
-                <td>Get price history for last year</td>
-                <td><InlineCode>company_id</InlineCode> - Company identifier</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/2y</InlineCode></td>
-                <td>Get price history for last 2 years</td>
-                <td><InlineCode>company_id</InlineCode> - Company identifier</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/5y</InlineCode></td>
-                <td>Get price history for last 5 years</td>
-                <td><InlineCode>company_id</InlineCode> - Company identifier</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/10y</InlineCode></td>
-                <td>Get price history for last 10 years</td>
-                <td><InlineCode>company_id</InlineCode> - Company identifier</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/price-history/:company_id/all</InlineCode></td>
-                <td>Get all-time price history</td>
-                <td><InlineCode>company_id</InlineCode> - Company identifier</td>
-              </tr>
-            </tbody>
-          </EndpointTable>
-
-          <SubSectionTitle>Market Analysis Endpoints</SubSectionTitle>
-          <EndpointTable>
-            <thead>
-              <tr><th>Endpoint</th><th>Description</th><th>Parameters</th></tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/exchange/:exchangeSymbol/top-gainers</InlineCode></td>
-                <td>Get top gaining stocks on an exchange</td>
-                <td><InlineCode>exchangeSymbol</InlineCode> - Exchange symbol (e.g., GSE, NYSE, NASDAQ)</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/exchange/:exchangeSymbol/top-losers</InlineCode></td>
-                <td>Get top losing stocks on an exchange</td>
-                <td><InlineCode>exchangeSymbol</InlineCode> - Exchange symbol</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/exchange/:exchangeSymbol/performance-by-industry</InlineCode></td>
-                <td>Get performance metrics grouped by industry</td>
-                <td><InlineCode>exchangeSymbol</InlineCode> - Exchange symbol</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/exchange/:exchangeSymbol/market-movers</InlineCode></td>
-                <td>Get stocks with highest volume and activity</td>
-                <td><InlineCode>exchangeSymbol</InlineCode> - Exchange symbol</td>
-              </tr>
-              <tr>
-                <td><MethodBadge method="GET">GET</MethodBadge> <InlineCode>/stocks/gse/status</InlineCode></td>
-                <td>Get current market status for GSE</td>
-                <td>None</td>
               </tr>
             </tbody>
           </EndpointTable>
