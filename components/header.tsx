@@ -406,6 +406,12 @@ const Header = () => {
     handleCloseMenu();
   }, [dispatch]);
 
+  // Navigation handler for login/signup
+  const handleNavigation = (path: string) => {
+    handleCloseMenu();
+    window.location.href = path;
+  };
+
   return (
     <>
       <HeadWrapper>
@@ -452,17 +458,19 @@ const Header = () => {
           {!isAuthenticated ? (
             <>
               <LoginButtonWrapper>
-                <StyledLoginButton variant="primary" onClick={handleCloseMenu}>
-                  <Link href="/login" style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
-                    Login
-                  </Link>
+                <StyledLoginButton 
+                  variant="primary" 
+                  onClick={() => handleNavigation('/login')}
+                >
+                  Login
                 </StyledLoginButton>
               </LoginButtonWrapper>
               <SignupButtonWrapper>
-                <StyledSignupButton variant="outline" onClick={handleCloseMenu}>
-                  <Link href="/signup" style={{ textDecoration: 'none', color: 'inherit', width: '100%' }}>
-                    Sign Up
-                  </Link>
+                <StyledSignupButton 
+                  variant="outline" 
+                  onClick={() => handleNavigation('/signup')}
+                >
+                  Sign Up
                 </StyledSignupButton>
               </SignupButtonWrapper>
             </>
